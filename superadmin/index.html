@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Administrador – E.T. Ali Primera</title>
+    <link rel="icon" type="image/png" href="../lib/recursos/logo ali.png">
+    <meta name="description" content="Panel de gestión de administradores – Sistema Escolar Ali Primera">
+    <!-- BLOQUEO ESTRICTO DE ACCESO POR URL -->
+    <script>
+        (function () {
+            try {
+                const raw = sessionStorage.getItem('currentUser');
+                if (!raw) {
+                    window.location.replace('../login/bienvenida.html');
+                    return;
+                }
+                const cu = JSON.parse(raw);
+                if (!cu || !cu.rol) {
+                    sessionStorage.removeItem('currentUser');
+                    window.location.replace('../login/bienvenida.html');
+                    return;
+                }
+                if (cu.rol === 'admin') {
+                    // Administrador regular intentando entrar a consola Superadmin por URL
+                    window.location.replace('../admin/index.html?alerta=acceso_denegado');
+                    return;
+                }
+                if (cu.rol === 'teacher') {
+                    // Docente intentando entrar a Superadmin por URL
+                    window.location.replace('../profesor/index.html?alerta=acceso_denegado');
+                    return;
+                }
+                if (cu.rol !== 'superadmin') {
+                    sessionStorage.removeItem('currentUser');
+                    window.location.replace('../login/bienvenida.html');
+                    return;
+                }
+            } catch(e) {
+                sessionStorage.removeItem('currentUser');
+                window.location.replace('../login/bienvenida.html');
+            }
+        })();
+    </script>
+    <link rel="stylesheet" href="superadmin.css?v=1.2.0">
+    <link rel="stylesheet" href="../lib/boxicons/css/boxicons.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
+</head>
+
+<body>
+
+    <!-- ===== SIDEBAR (mismo estilo que admin/index.html) ===== -->
+    <div class="sidebar" id="sidebar">
+        <div class="header">
+            <div class="menu-btn" id="menu-btn">
+                <i class='bx bx-chevron-left'></i>
+            </div>
+            <div class="brand">
+                <img src="../lib/recursos/logo ali.png" alt="Logo Ali Primera">
+                <span>Ali Primera</span>
+            </div>
+        </div>
+
+        <div class="menu-container">
+            <ul class="menu">
+                <li class="menu-item active" id="sa-nav-admins" onclick="switchSATab('admins')">
+                    <a href="#" class="menu-link">
+                        <i class='bx bx-shield'></i>
+                        <span>Administradores</span>
+                    </a>
+                </li>
+                <li class="menu-item" id="sa-nav-teachers" onclick="switchSATab('teachers')">
+                    <a href="#" class="menu-link">
+                        <i class='bx bx-briefcase'></i>
+                        <span>Profesores</span>
+                    </a>
+                </li>
+                <li class="menu-item" id="sa-nav-students" onclick="switchSATab('students')">
+                    <a href="#" class="menu-link">
+                        <i class='bx bxs-graduation'></i>
+                        <span>Estudiantes</span>
+                    </a>
+                </li>
+                <li class="menu-item" id="sa-nav-database" onclick="switchSATab('database')">
+                    <a href="#" class="menu-link">
+                        <i class='bx bx-data'></i>
+                        <span>Base de Datos</span>
+                    </a>
+                </li>
+                <li class="menu-item" id="sa-nav-reports" onclick="switchSATab('reports')">
+                    <a href="#" class="menu-link">
+                        <i class='bx bx-file-blank'></i>
+                        <span>Reportes y Auditoría</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="../admin/index.html" class="menu-link" target="_blank">
+                        <i class='bx bx-link-external'></i>
+                        <span>Ver Panel Admin</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="footer">
+            <ul class="menu">
+                <li class="menu-item menu-item-static">
+                    <a href="#" class="menu-link" style="align-items:center;">
+                        <i class='bx bx-user-circle' style="font-size:1.8rem;"></i>
+                        <div style="display:flex;flex-direction:column;justify-content:center;overflow:hidden;">
+                            <span id="sa-user-name"
+                                style="line-height:1.2;font-weight:600;font-size:0.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Usuario</span>
+                            <span style="line-height:1.2;font-size:0.7rem;opacity:0.8;margin-top:2px;">Super
+                                Admin</span>
+                        </div>
+                    </a>
+                </li>
+                <li class="menu-item menu-item-static">
+                    <a href="#" class="menu-link" id="sa-logout-btn">
+                        <i class='bx bx-log-out'></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- ===== MAIN ===== -->
+    <div class="main-content">
+
+        <!-- TOPBAR -->
+        <div class="sa-topbar">
+            <div class="sa-page-title" id="sa-page-title">
+                <i class='bx bx-shield' id="sa-page-title-icon"></i>
+                <span id="sa-page-title-text">Gestión de Administradores</span>
+            </div>
+            <div class="sa-time-badge">
+                <i class='bx bx-time-five'></i>
+                <span id="sa-time-display"></span>
+            </div>
+        </div>
+
+        <!-- STATS -->
+        <div class="sa-stats-grid" id="sa-stats-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
+            <div class="sa-stat-card" style="cursor:pointer;" onclick="switchSATab('admins')">
+                <div class="sa-stat-icon">
+                    <i class='bx bx-shield'></i>
+                </div>
+                <div>
+                    <div class="sa-stat-value" id="sa-stat-admins">—</div>
+                    <div class="sa-stat-label">Administradores registrados</div>
+                </div>
+            </div>
+            <div class="sa-stat-card" style="cursor:pointer;" onclick="switchSATab('teachers')">
+                <div class="sa-stat-icon" style="background:#eff6ff;color:#2563eb;">
+                    <i class='bx bx-briefcase'></i>
+                </div>
+                <div>
+                    <div class="sa-stat-value" id="sa-stat-teachers">—</div>
+                    <div class="sa-stat-label">Profesores registrados</div>
+                </div>
+            </div>
+            <div class="sa-stat-card" style="cursor:pointer;" onclick="switchSATab('students')">
+                <div class="sa-stat-icon" style="background:#f0fdf4;color:#16a34a;">
+                    <i class='bx bxs-graduation'></i>
+                </div>
+                <div>
+                    <div class="sa-stat-value" id="sa-stat-students">—</div>
+                    <div class="sa-stat-label">Estudiantes matriculados</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 1: ADMINISTRADORES -->
+        <div id="sa-tab-admins" class="sa-tab-pane">
+            <!-- PANEL TABLA -->
+            <div class="list-card">
+                <div class="header-section">
+                    <h2 style="display:flex;align-items:center;gap:0.5rem;">
+                        <i class='bx bx-group' style="color:#4a151b;"></i>
+                        Lista de Administradores
+                    </h2>
+                    <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+                        <div class="sa-search-box">
+                            <i class='bx bx-search'></i>
+                            <input type="text" id="sa-search-input" class="sa-search-input"
+                                placeholder="Buscar nombre, cédula, email…">
+                        </div>
+                        <button class="btn-primary" id="sa-add-admin-btn">
+                            + Nuevo Administrador
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Administrador</th>
+                                <th>Email</th>
+                                <th>Teléfono</th>
+                                <th>Rol</th>
+                                <th style="text-align:center;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sa-admins-tbody">
+                            <tr>
+                                <td colspan="6" class="empty-msg">
+                                    <i class='bx bx-loader-alt sa-spin'
+                                        style="font-size:1.5rem;display:block;margin-bottom:0.5rem;color:#4a151b;"></i>
+                                    Cargando administradores...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PANEL SOLICITUDES DE RESET -->
+            <div class="list-card" style="margin-top:2rem;">
+                <div class="header-section">
+                    <h2 style="display:flex;align-items:center;gap:0.5rem;color:#dc2626;">
+                        <i class='bx bx-error-circle'></i>
+                        Solicitudes de Restablecimiento
+                    </h2>
+                    <div style="font-size:0.85rem;color:#64748b;">
+                        Administradores que olvidaron su contraseña
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Administrador</th>
+                                <th>Cédula</th>
+                                <th>Email</th>
+                                <th style="text-align:center;">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sa-reset-tbody">
+                            <tr>
+                                <td colspan="5" class="empty-msg">
+                                    <i class='bx bx-check-shield' style="font-size:2rem;color:#16a34a;display:block;margin-bottom:0.5rem;"></i>
+                                    No hay solicitudes pendientes.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PANEL SOLICITUDES DE RESET PROFESORES -->
+            <div class="list-card" style="margin-top:2rem;">
+                <div class="header-section">
+                    <h2 style="display:flex;align-items:center;gap:0.5rem;color:#1d4ed8;">
+                        <i class='bx bx-chalkboard'></i>
+                        Solicitudes de Profesores
+                    </h2>
+                    <div style="font-size:0.85rem;color:#64748b;">
+                        Profesores que olvidaron su contraseña
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Profesor</th>
+                                <th>Cédula</th>
+                                <th>Email</th>
+                                <th style="text-align:center;">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sa-teacher-reset-tbody">
+                            <tr>
+                                <td colspan="5" class="empty-msg">
+                                    <i class='bx bx-check-shield' style="font-size:2rem;color:#16a34a;display:block;margin-bottom:0.5rem;"></i>
+                                    No hay solicitudes pendientes.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div><!-- /sa-tab-admins -->
+
+        <!-- TAB 2: PROFESORES -->
+        <div id="sa-tab-teachers" class="sa-tab-pane" style="display:none;">
+            <div class="list-card">
+                <div class="header-section">
+                    <div>
+                        <h2 style="display:flex;align-items:center;gap:0.5rem;color:#1e293b;">
+                            <i class='bx bx-briefcase' style="color:#2563eb;"></i>
+                            Gestión y Baja de Profesores
+                        </h2>
+                        <p style="font-size:0.83rem;color:#64748b;margin-top:3px;">
+                            Solo el Superadministrador posee permisos para eliminar permanentemente a profesores del sistema escolar. También puede inhabilitar accesos.
+                        </p>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+                        <div class="sa-search-box">
+                            <i class='bx bx-search'></i>
+                            <input type="text" id="sa-search-teachers-input" class="sa-search-input"
+                                placeholder="Buscar profesor por nombre, cédula, email…">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Profesor</th>
+                                <th>Email</th>
+                                <th>Teléfono</th>
+                                <th>Tipo Docente</th>
+                                <th>Estado</th>
+                                <th style="text-align:center;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sa-teachers-tbody">
+                            <tr>
+                                <td colspan="7" class="empty-msg">
+                                    <i class='bx bx-loader-alt sa-spin' style="font-size:1.5rem;display:block;margin-bottom:0.5rem;color:#4a151b;"></i>
+                                    Cargando profesores...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div><!-- /sa-tab-teachers -->
+
+        <!-- TAB 3: ESTUDIANTES -->
+        <div id="sa-tab-students" class="sa-tab-pane" style="display:none;">
+            <div class="list-card">
+                <div class="header-section" style="flex-wrap:wrap;gap:1rem;">
+                    <div>
+                        <h2 style="display:flex;align-items:center;gap:0.5rem;color:#1e293b;">
+                            <i class='bx bxs-graduation' style="color:#16a34a;"></i>
+                            Gestión y Control de Estudiantes
+                        </h2>
+                        <p style="font-size:0.83rem;color:#64748b;margin-top:3px;">
+                            Matrícula estudiantil organizada por mención, año y sección. Sincronizada automáticamente con todos los perfiles y promociones.
+                        </p>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:0.5rem;">
+                        <button class="sa-btn-icon" id="sa-refresh-students-btn" title="Sincronizar y recargar datos de estudiantes">
+                            <i class='bx bx-refresh' style="font-size:1.3rem;"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- BARRA DE FILTROS AVANZADOS -->
+                <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;background:#f8fafc;padding:0.85rem 1.25rem;border-radius:12px;margin-bottom:1.5rem;border:1px solid #e2e8f0;">
+                    <div style="display:flex;align-items:center;gap:0.4rem;font-weight:600;font-size:0.85rem;color:#475569;">
+                        <i class='bx bx-filter-alt' style="color:#16a34a;font-size:1.15rem;"></i> Filtros:
+                    </div>
+
+                    <!-- Filtro Mención -->
+                    <select id="sa-student-mention-filter" class="sa-filter-select">
+                        <option value="">Todas las menciones</option>
+                    </select>
+
+                    <!-- Filtro Sección -->
+                    <select id="sa-student-section-filter" class="sa-filter-select">
+                        <option value="">Todas las secciones</option>
+                    </select>
+
+                    <!-- Buscador -->
+                    <div class="sa-search-box" style="flex:1;min-width:220px;">
+                        <i class='bx bx-search'></i>
+                        <input type="text" id="sa-search-students-input" class="sa-search-input"
+                            placeholder="Buscar nombre, apellido o cédula…">
+                    </div>
+
+                    <!-- Contador -->
+                    <div id="sa-student-count-badge" style="font-size:0.8rem;font-weight:600;color:#166534;background:#dcfce7;padding:0.4rem 0.75rem;border-radius:20px;white-space:nowrap;">
+                        0 estudiantes
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width:50px;">#</th>
+                                <th>Estudiante</th>
+                                <th>Cédula</th>
+                                <th>Sección</th>
+                                <th>Mención</th>
+                                <th>Email / Teléfono</th>
+                                <th style="text-align:center;">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sa-students-tbody">
+                            <tr>
+                                <td colspan="7" class="empty-msg">
+                                    <i class='bx bx-loader-alt sa-spin' style="font-size:1.5rem;display:block;margin-bottom:0.5rem;color:#4a151b;"></i>
+                                    Cargando estudiantes...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div><!-- /sa-tab-students -->
+
+        <!-- TAB 4: BASE DE DATOS Y MANTENIMIENTO -->
+        <div id="sa-tab-database" class="sa-tab-pane" style="display:none;">
+            <!-- TARJETAS DE ESTADÍSTICAS BD -->
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
+                <div class="sa-stat-card sa-db-card-server">
+                    <div class="sa-stat-icon" style="background:#e0f2fe;color:#0284c7;">
+                        <i class='bx bx-server'></i>
+                    </div>
+                    <div style="min-width:0; overflow:hidden;">
+                        <div class="sa-stat-value" id="sa-db-name" style="font-size:1.35rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="Base de Datos">sistema_ali</div>
+                        <div class="sa-stat-label" id="sa-db-version">MySQL ...</div>
+                    </div>
+                </div>
+                <div class="sa-stat-card sa-db-card-tables">
+                    <div class="sa-stat-icon" style="background:#fef3c7;color:#d97706;">
+                        <i class='bx bx-table'></i>
+                    </div>
+                    <div>
+                        <div class="sa-stat-value" id="sa-db-tables">—</div>
+                        <div class="sa-stat-label"><span id="sa-db-rows">—</span> Registros en total</div>
+                    </div>
+                </div>
+                <div class="sa-stat-card sa-db-card-size">
+                    <div class="sa-stat-icon" style="background:#f3e8ff;color:#9333ea;">
+                        <i class='bx bx-pie-chart-alt-2'></i>
+                    </div>
+                    <div>
+                        <div class="sa-stat-value" id="sa-db-size">—</div>
+                        <div class="sa-stat-label">Tamaño en Disco (Datos + Índices)</div>
+                    </div>
+                </div>
+                <div class="sa-stat-card sa-db-card-backups">
+                    <div class="sa-stat-icon" style="background:#dcfce7;color:#16a34a;">
+                        <i class='bx bx-save'></i>
+                    </div>
+                    <div>
+                        <div class="sa-stat-value" id="sa-db-backups-count">—</div>
+                        <div class="sa-stat-label">Respaldos Almacenados</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANEL ACCIONES Y RESPALDOS -->
+            <div class="list-card">
+                <div class="header-section" style="flex-wrap:wrap; gap:1rem;">
+                    <div>
+                        <h2 style="display:flex;align-items:center;gap:0.5rem;color:#1e293b;">
+                            <i class='bx bx-data' style="color:#4a151b;"></i>
+                            Copias de Seguridad (Respaldos .SQL)
+                        </h2>
+                        <p style="font-size:0.83rem;color:#64748b;margin-top:3px;">
+                            Genere respaldos bajo demanda, descargue volcados completos o restaure la base de datos a un punto anterior.
+                        </p>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+                        <button class="btn-primary" id="sa-btn-optimize-db" style="background:#0284c7;border-color:#0284c7;display:flex;align-items:center;gap:0.4rem;">
+                            <i class='bx bx-tachometer'></i> Optimizar e Indexar Tablas
+                        </button>
+                        <button class="btn-primary" id="sa-btn-create-backup" style="display:flex;align-items:center;gap:0.4rem;">
+                            <i class='bx bx-plus-circle'></i> Crear Respaldo Ahora
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width:50px;">#</th>
+                                <th>Archivo de Respaldo</th>
+                                <th>Tamaño</th>
+                                <th>Fecha y Hora</th>
+                                <th style="text-align:center;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sa-backups-tbody">
+                            <tr>
+                                <td colspan="5" class="empty-msg">
+                                    <i class='bx bx-loader-alt sa-spin' style="font-size:1.5rem;display:block;margin-bottom:0.5rem;color:#4a151b;"></i>
+                                    Cargando respaldos...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PANEL ESTADO DE TABLAS E ÍNDICES -->
+            <div class="list-card" style="margin-top:2rem;">
+                <div class="header-section">
+                    <div>
+                        <h2 style="display:flex;align-items:center;gap:0.5rem;color:#1e293b;">
+                            <i class='bx bx-pulse' style="color:#0284c7;"></i>
+                            Diagnóstico, Índices y Desfragmentación
+                        </h2>
+                        <p style="font-size:0.83rem;color:#64748b;margin-top:3px;">
+                            Monitoreo del estado físico y lógico de las tablas del motor InnoDB tras la última optimización.
+                        </p>
+                    </div>
+                    <div id="sa-last-optimization-badge" style="font-size:0.82rem;color:#64748b;background:#f1f5f9;padding:0.35rem 0.75rem;border-radius:20px;">
+                        Última optimización: No ejecutada en esta sesión
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tabla</th>
+                                <th>Motor</th>
+                                <th>Registros</th>
+                                <th>Datos</th>
+                                <th>Índices</th>
+                                <th>Total</th>
+                                <th>Integridad (Check)</th>
+                                <th>Estado Optimización</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sa-tables-tbody">
+                            <tr>
+                                <td colspan="8" class="empty-msg">
+                                    <i class='bx bx-info-circle' style="font-size:1.8rem;color:#64748b;display:block;margin-bottom:0.4rem;"></i>
+                                    Haga clic en <strong>"Optimizar e Indexar Tablas"</strong> para analizar y desfragmentar los índices del sistema.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div><!-- /sa-tab-database -->
+
+        <!-- TAB 5: REPORTES Y AUDITORÍA DE USUARIOS -->
+        <div id="sa-tab-reports" class="sa-tab-pane" style="display:none;">
+            <div class="list-card">
+                <div class="header-section" style="flex-wrap:wrap;gap:1rem;">
+                    <div>
+                        <h2 style="display:flex;align-items:center;gap:0.5rem;color:#1e293b;">
+                            <i class='bx bx-history' style="color:#4a151b;"></i>
+                            Control de Usuarios y Auditoría de Cambios
+                        </h2>
+                        <p style="font-size:0.83rem;color:#64748b;margin-top:3px;">
+                            Historial cronológico de creaciones, modificaciones, inhabilitaciones, reseteos de claves y operaciones críticas en el sistema.
+                        </p>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+                        <button class="btn-primary" id="sa-btn-print-report" style="background:#1e293b;border-color:#1e293b;display:flex;align-items:center;gap:0.4rem;">
+                            <i class='bx bx-printer'></i> Imprimir Reporte
+                        </button>
+                        <button class="sa-btn-icon" id="sa-refresh-reports-btn" title="Refrescar historial de auditoría">
+                            <i class='bx bx-refresh' style="font-size:1.3rem;"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- BARRA DE FILTROS DE AUDITORÍA -->
+                <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;background:#f8fafc;padding:0.85rem 1.25rem;border-radius:12px;margin:1.25rem 1.25rem 0.5rem;border:1px solid #e2e8f0;">
+                    <div style="display:flex;align-items:center;gap:0.4rem;font-weight:600;font-size:0.85rem;color:#475569;">
+                        <i class='bx bx-filter-alt' style="color:#4a151b;font-size:1.15rem;"></i> Filtros:
+                    </div>
+
+                    <!-- Filtro Entidad -->
+                    <select id="sa-report-entity-filter" class="sa-filter-select">
+                        <option value="">Todas las entidades</option>
+                        <option value="administrador">Administradores</option>
+                        <option value="profesor">Profesores</option>
+                        <option value="estudiante">Estudiantes</option>
+                        <option value="base_datos">Base de Datos</option>
+                    </select>
+
+                    <!-- Filtro Acción -->
+                    <select id="sa-report-action-filter" class="sa-filter-select">
+                        <option value="">Todas las acciones</option>
+                        <option value="crear">Creación (+)</option>
+                        <option value="modificar">Modificación</option>
+                        <option value="cambio_clave">Cambio de Contraseña</option>
+                        <option value="inhabilitar">Inhabilitación</option>
+                        <option value="habilitar">Habilitación</option>
+                        <option value="eliminar">Eliminación</option>
+                        <option value="resolver_reset">Reseteo Atendido</option>
+                        <option value="backup">Respaldo BD</option>
+                        <option value="restaurar">Restauración BD</option>
+                        <option value="optimizar">Optimización BD</option>
+                    </select>
+
+                    <!-- Fechas Desde / Hasta -->
+                    <div style="display:flex;align-items:center;gap:0.35rem;">
+                        <span style="font-size:0.8rem;color:#64748b;font-weight:500;">Desde:</span>
+                        <input type="date" id="sa-report-date-from" class="sa-filter-select" style="min-width:130px;padding:0.45rem 0.6rem;">
+                    </div>
+                    <div style="display:flex;align-items:center;gap:0.35rem;">
+                        <span style="font-size:0.8rem;color:#64748b;font-weight:500;">Hasta:</span>
+                        <input type="date" id="sa-report-date-to" class="sa-filter-select" style="min-width:130px;padding:0.45rem 0.6rem;">
+                    </div>
+
+                    <!-- Buscador -->
+                    <div class="sa-search-box" style="flex:1;min-width:220px;">
+                        <i class='bx bx-search'></i>
+                        <input type="text" id="sa-report-search-input" class="sa-search-input"
+                            placeholder="Buscar usuario, afectado, detalle...">
+                    </div>
+
+                    <!-- Contador -->
+                    <div id="sa-report-count-badge" style="font-size:0.8rem;font-weight:600;color:#1e40af;background:#dbeafe;padding:0.4rem 0.75rem;border-radius:20px;white-space:nowrap;">
+                        0 eventos registrados
+                    </div>
+                </div>
+
+                <div class="table-responsive" style="padding:1rem 1.25rem 1.5rem;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width:50px;">#</th>
+                                <th>Fecha y Hora</th>
+                                <th>Responsable</th>
+                                <th>Acción</th>
+                                <th>Entidad / Afectado</th>
+                                <th>Detalle de la Operación</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sa-reports-tbody">
+                            <tr>
+                                <td colspan="6" class="empty-msg">
+                                    <i class='bx bx-loader-alt sa-spin' style="font-size:1.5rem;display:block;margin-bottom:0.5rem;color:#4a151b;"></i>
+                                    Cargando registros de auditoría...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div><!-- /sa-tab-reports -->
+
+    </div><!-- /main-content -->
+
+
+    <!-- ===== MODAL CREAR / EDITAR ADMIN ===== -->
+    <div class="modal-overlay" id="sa-modal-overlay">
+        <div class="modal-container" style="max-width:520px;">
+            <div class="modal-header">
+                <h3 id="sa-modal-title">
+                    <i class='bx bx-shield-plus'></i> Nuevo Administrador
+                </h3>
+                <button class="modal-close" id="sa-modal-close"><i class='bx bx-x'></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="sa-admin-form" autocomplete="off">
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label">Cédula <span style="color:#dc2626;">*</span></label>
+                            <div style="display:flex;gap:0.4rem;">
+                                <select id="sa-admin-cedula-prefix"
+                                    style="width:70px;padding:0.6rem 0.4rem;border:1px solid #ddd;border-radius:6px;font-size:0.9rem;background:#f8fafc;font-family:'Poppins',sans-serif;outline:none;cursor:pointer;">
+                                    <option value="V">V-</option>
+                                    <option value="E">E-</option>
+                                </select>
+                                <input type="text" id="sa-admin-cedula" class="form-input" placeholder="12345678"
+                                    style="flex:1;">
+                            </div>
+                            <div class="sa-form-error" id="sa-cedula-error"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Teléfono</label>
+                            <input type="tel" id="sa-admin-telefono" class="form-input" placeholder="0412-1234567">
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label">Nombre <span style="color:#dc2626;">*</span></label>
+                            <input type="text" id="sa-admin-nombre" class="form-input" placeholder="Nombre(s)">
+                            <div class="sa-form-error" id="sa-nombre-error"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Apellido <span style="color:#dc2626;">*</span></label>
+                            <input type="text" id="sa-admin-apellido" class="form-input" placeholder="Apellido(s)">
+                            <div class="sa-form-error" id="sa-apellido-error"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" id="sa-admin-email" class="form-input" placeholder="ejemplo@correo.com">
+                        <div class="sa-form-error" id="sa-email-error"></div>
+                    </div>
+
+                    <hr style="border:none;border-top:1px solid #eee;margin:0.5rem 0 1rem;">
+
+                    <div class="form-group">
+                        <label class="form-label">Contraseña <span style="color:#dc2626;">*</span></label>
+                        <div class="password-field-container">
+                            <input type="password" id="sa-admin-password" class="form-input"
+                                placeholder="Mínimo 6 caracteres" style="padding-right:3rem;">
+                            <i class='bx bx-hide toggle-password' id="sa-pw-toggle-1"></i>
+                        </div>
+                        <div class="sa-form-error" id="sa-password-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Confirmar Contraseña <span style="color:#dc2626;">*</span></label>
+                        <div class="password-field-container">
+                            <input type="password" id="sa-admin-confirm-password" class="form-input"
+                                placeholder="Repita la contraseña" style="padding-right:3rem;">
+                            <i class='bx bx-hide toggle-password' id="sa-pw-toggle-2"></i>
+                        </div>
+                        <div class="sa-form-error" id="sa-confirm-error"></div>
+                    </div>
+
+                    <div id="sa-pw-hint"
+                        style="display:none;align-items:center;gap:0.4rem;font-size:0.8rem;color:#666;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:0.5rem 0.7rem;margin-top:-0.5rem;">
+                        <i class='bx bx-info-circle' style="color:#d97706;"></i>
+                        Deje la contraseña en blanco para no cambiarla
+                    </div>
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="sa-modal-cancel">Cancelar</button>
+                <button class="btn-primary" id="sa-modal-save">
+                    <i class='bx bx-save'></i> Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== CONFIRMAR ELIMINACIÓN ===== -->
+    <div class="modal-overlay" id="sa-confirm-overlay">
+        <div class="modal-container" style="max-width:380px;text-align:center;">
+            <div class="modal-header" style="background:#dc2626;">
+                <h3 style="color:#fff;display:flex;align-items:center;gap:0.4rem;">
+                    <i class='bx bx-error-circle'></i> Confirmar eliminación
+                </h3>
+            </div>
+            <div class="modal-body" style="padding:1.5rem;">
+                <p id="sa-confirm-msg" style="color:#555;font-size:0.9rem;line-height:1.6;">
+                    ¿Estás seguro de eliminar este administrador?
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="sa-confirm-cancel">Cancelar</button>
+                <button class="btn-primary" id="sa-confirm-ok" style="background:#dc2626;">
+                    <i class='bx bx-trash'></i> Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL CAMBIAR CONTRASEÑA PROFESOR ===== -->
+    <div class="modal-overlay" id="sa-teacher-pw-modal">
+        <div class="modal-container" style="max-width:420px;">
+            <div class="modal-header" style="background:#1d4ed8;">
+                <h3 style="color:#fff;display:flex;align-items:center;gap:0.4rem;">
+                    <i class='bx bx-lock-open-alt'></i> Cambiar Contraseña del Profesor
+                </h3>
+                <button class="modal-close" id="sa-teacher-pw-close" style="color:#fff;"><i class='bx bx-x'></i></button>
+            </div>
+            <div class="modal-body">
+                <p id="sa-teacher-pw-desc" style="margin-bottom:1rem;color:#64748b;font-size:0.88rem;background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:0.6rem 0.8rem;"></p>
+                <div class="form-group">
+                    <label class="form-label">Nueva Contraseña <span style="color:#dc2626;">*</span></label>
+                    <div class="password-field-container">
+                        <input type="password" id="sa-teacher-new-pw" class="form-input" placeholder="Mínimo 6 caracteres" autocomplete="new-password" style="padding-right:3rem;">
+                        <i class='bx bx-hide toggle-password' id="sa-teacher-pw-toggle"></i>
+                    </div>
+                    <div class="sa-form-error" id="sa-teacher-pw-error"></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Confirmar Contraseña <span style="color:#dc2626;">*</span></label>
+                    <div class="password-field-container">
+                        <input type="password" id="sa-teacher-confirm-pw" class="form-input" placeholder="Repite la contraseña" autocomplete="new-password" style="padding-right:3rem;">
+                        <i class='bx bx-hide toggle-password' id="sa-teacher-confirm-toggle"></i>
+                    </div>
+                    <div class="sa-form-error" id="sa-teacher-confirm-error"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="sa-teacher-pw-cancel">Cancelar</button>
+                <button class="btn-primary" id="sa-teacher-pw-save" style="background:#1d4ed8;">
+                    <i class='bx bx-save'></i> Guardar Contraseña
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL CONFIRMAR RESTAURACIÓN ===== -->
+    <div class="modal-overlay" id="sa-modal-restore-overlay">
+        <div class="modal-container" style="max-width:480px;text-align:center;padding:2rem;">
+            <i class='bx bx-error-circle' style="font-size:3.5rem;color:#dc2626;display:inline-block;margin-bottom:1rem;"></i>
+            <h3 style="font-size:1.3rem;font-weight:600;margin-bottom:0.75rem;color:#1e293b;">¿Restaurar Base de Datos?</h3>
+            <p style="color:#64748b;font-size:0.9rem;line-height:1.5;margin-bottom:1.5rem;">
+                Está a punto de restaurar el respaldo:<br><strong id="sa-restore-filename-display" style="color:#1e293b;word-break:break-all;"></strong><br><br>
+                <span style="color:#dc2626;font-weight:600;">¡ADVERTENCIA!</span> Esta operación reemplazará los datos actuales de la institución por los contenidos en esta copia de seguridad.
+            </p>
+            <div style="display:flex;justify-content:center;gap:1rem;">
+                <button type="button" class="btn-secondary" id="sa-restore-cancel-btn" style="padding:0.6rem 1.25rem;">Cancelar</button>
+                <button type="button" class="btn-primary" id="sa-restore-confirm-btn" style="background:#dc2626;border-color:#dc2626;padding:0.6rem 1.25rem;">
+                    Sí, Restaurar Ahora
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SCRIPTS ===== -->
+    <script src="superadmin.js?v=1.2.0"></script>
+    <script src="../lib/data.js?v=1.3.0"></script>
+    <script>
+        // Botón minimizar sidebar (igual que admin)
+        const sidebar = document.getElementById('sidebar');
+        const menuBtn = document.getElementById('menu-btn');
+        if (menuBtn) {
+            menuBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('minimize');
+            });
+        }
+
+        // Reloj
+        function updateClock() {
+            const el = document.getElementById('sa-time-display');
+            if (!el) return;
+            const now = new Date();
+            el.textContent =
+                now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) +
+                ' · ' +
+                now.toLocaleDateString('es-ES', { weekday: 'short', day: '2-digit', month: 'short' });
+        }
+        updateClock();
+        setInterval(updateClock, 30000);
+
+        // Notificación si se redirigió por intento de acceso a URL restringida
+        window.addEventListener('load', () => {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('alerta') === 'acceso_denegado') {
+                if (typeof showSAToast === 'function') {
+                    showSAToast('Acceso denegado: No tienes permisos para ingresar a ese módulo con tu perfil actual.', 'error');
+                }
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        });
+    </script>
+
+</body>
+
+</html>

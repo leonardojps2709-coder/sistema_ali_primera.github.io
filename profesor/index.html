@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Escolar - Profesores</title>
+    <!-- BLOQUEO ESTRICTO DE ACCESO POR URL -->
+    <script>
+        (function() {
+            try {
+                const raw = sessionStorage.getItem('currentUser');
+                if (!raw) {
+                    window.location.replace('../login/bienvenida.html');
+                    return;
+                }
+                const cu = JSON.parse(raw);
+                if (!cu || !cu.rol) {
+                    sessionStorage.removeItem('currentUser');
+                    window.location.replace('../login/bienvenida.html');
+                    return;
+                }
+                if (cu.activo !== undefined && cu.activo !== null && parseInt(cu.activo) === 0) {
+                    sessionStorage.removeItem('currentUser');
+                    alert('Tu cuenta docente ha sido inhabilitada. Contacta al departamento de Control de Estudios.');
+                    window.location.replace('../login/bienvenida.html');
+                    return;
+                }
+                if (cu.rol === 'admin') {
+                    // Administrador intentando entrar a panel docente por URL
+                    window.location.replace('../admin/index.html?alerta=acceso_denegado');
+                    return;
+                }
+                if (cu.rol === 'superadmin') {
+                    // Superadministrador intentando entrar a panel docente por URL
+                    window.location.replace('../superadmin/index.html?alerta=acceso_denegado');
+                    return;
+                }
+                if (cu.rol !== 'teacher') {
+                    sessionStorage.removeItem('currentUser');
+                    window.location.replace('../login/bienvenida.html');
+                    return;
+                }
+            } catch(e) {
+                sessionStorage.removeItem('currentUser');
+                window.location.replace('../login/bienvenida.html');
+            }
+        })();
+    </script>
+    <link rel="stylesheet" href="estilo index-prof.css?v=2.0.1">
+    <link rel="stylesheet" href="menciones.css?v=1.0.0">
+    <link rel="stylesheet" href="../lib/boxicons/css/boxicons.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
+    <link rel="stylesheet" href="evaluaciones.css?v=1.0.5">
+    <link rel="stylesheet" href="../lib/footer.css?v=1.0.2">
+    <link rel="stylesheet" href="../lib/boletin.css?v=1.0.0">
+    <link rel="stylesheet" href="../lib/reportes.css?v=1.0.6">
+    <!-- Utilidades globales (Notificaciones) -->
+    <script type="module" src="../src/utils/domHelper.js"></script>
+</head>
+<body>
+    <!-- Verificación de sesión al cargar la página -->
+    <script>
+        // Definir ruta global de la API para que data.js la encuentre fácilmente
+        window.API_PATH = "../api/main.php";
+    </script>
+
+    <div class="sidebar" id="sidebar">
+        <div class="header">
+            <div class="menu-btn" id="menu-btn">
+                <i class='bx bx-chevron-left'></i>
+            </div>
+            <div class="brand">
+                <img src="../lib/recursos/logo ali.png" alt="Logo">
+                <span>Ali Primera</span>
+            </div>
+        </div>
+
+        <div class="menu-container">
+
+            
+            <ul class="menu">
+                <li class="menu-item active">
+                    <a href="#" class="menu-link" data-section="home">
+                        <i class="bx bx-home-alt-2"></i>
+                        <span>Inicio</span>
+                    </a>
+                </li>
+
+                <li class="menu-item menu-dropdown">
+                    <a href="#" class="menu-link">
+                        <i class="bx bxs-graduation"></i>
+                        <span>Académico</span>
+                        <i class="bx bx-chevron-down dropdown-arrow"></i>
+                    </a>
+                    <ul class="sub-menu">
+                        <li><a href="#" class="sub-menu-link" data-section="sections"><i class="bx bx-grid"></i><span>Secciones y Años</span></a></li>
+                        <li><a href="#" class="sub-menu-link" data-section="students"><i class="bx bx-user-pin"></i><span>Estudiantes</span></a></li>
+                        <li><a href="#" class="sub-menu-link" data-section="grades"><i class="bx bx-edit-alt"></i><span>Registrar Notas</span></a></li>
+                        <li><a href="#" class="sub-menu-link" data-section="evaluaciones"><i class="bx bx-bar-chart-alt-2"></i><span>Evaluaciones</span></a></li>
+                        <li><a href="#" class="sub-menu-link" data-section="student-report"><i class="bx bx-printer"></i><span>Reporte de Notas</span></a></li>
+                    </ul>
+                </li>
+
+                <li class="menu-item menu-dropdown">
+                    <a href="#" class="menu-link">
+                        <i class="bx bx-buildings"></i>
+                        <span>Gestión</span>
+                        <i class="bx bx-chevron-down dropdown-arrow"></i>
+                    </a>
+                    <ul class="sub-menu">
+                        <li><a href="#" class="sub-menu-link" data-section="mentions"><i class="bx bx-category"></i><span>Menciones</span></a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div class="footer">
+            <ul class="menu">
+                <li class="menu-item menu-item-static">
+                    <a href="#" class="menu-link" id="user-info-link" style="align-items: center;">
+                        <i class="bx bx-user-circle" style="font-size: 1.8rem;"></i>
+                        <div style="display: flex; flex-direction: column; justify-content: center; overflow: hidden;">
+                            <span id="user-name-display" style="line-height: 1.2; font-weight: 600; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Usuario</span>
+                            <span id="user-role-display" style="line-height: 1.2; font-size: 0.7rem; opacity: 0.8; margin-top: 2px;">Profesor</span>
+                        </div>
+                    </a>
+                </li>
+                <li class="menu-item menu-item-static">
+                    <a href="#" class="menu-link open-about-btn" title="Acerca del Sistema">
+                        <i class="bx bx-info-circle"></i>
+                        <span>Acerca de</span>
+                    </a>
+                </li>
+                <li class="menu-item menu-item-static">
+                    <a href="#" class="menu-link" id="logout-btn">
+                        <i class="bx bx-log-out"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <main class="main-content" id="main-content">
+        <!-- INICIO -->
+        <section id="home-section" class="content-section active">
+            <div class="header-section">
+                <div>
+                    <h1>Panel del Profesor</h1>
+                    <p>Bienvenido al sistema de control de estudios de la E.T. "Ali Primera".</p>
+                </div>
+                <div class="current-date" id="current-date-display" style="text-align: right; color: #666; font-size: 0.9rem;">
+                    <!-- Se llenará con JS -->
+                </div>
+            </div>
+
+            <!-- Contenedor para Notificaciones -->
+            <div id="vaciados-notification-container" style="margin-top: 15px; margin-bottom: 20px;"></div>
+
+            <!-- ACCIONES RÁPIDAS -->
+            <div class="quick-actions-container" style="margin-top: 2rem;">
+                <h3 style="margin-bottom: 1rem;">Acciones Rápidas</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <button class="btn-primary" data-section="grades" style="display: flex; align-items: center; justify-content: center; gap: 10px; padding: 1rem;">
+                        <i class='bx bx-edit-alt'></i> Vacear Notas
+                    </button>
+                    <button class="btn-primary" data-section="student-report" style="display: flex; align-items: center; justify-content: center; gap: 10px; padding: 1rem;">
+                        <i class='bx bx-printer'></i> Generar Boletín
+                    </button>
+                    <button class="btn-primary" data-section="sections" style="display: flex; align-items: center; justify-content: center; gap: 10px; padding: 1rem;">
+                        <i class='bx bx-grid-alt'></i> Mis Secciones
+                    </button>
+                    <button class="btn-primary" data-section="students" style="display: flex; align-items: center; justify-content: center; gap: 10px; padding: 1rem;">
+                        <i class='bx bx-group'></i> Mis Estudiantes
+                    </button>
+                </div>
+            </div>
+
+            <div class="cards">
+                <div class="card" data-section="students" style="cursor: pointer;">
+                    <i class="bx bxs-graduation"></i>
+                    <h3>Académico</h3>
+                    <p id="total-students-home">0 Estudiantes</p>
+                </div>
+                <div class="card" data-section="mentions" style="cursor: pointer;">
+                    <i class="bx bx-wrench"></i>
+                    <h3>Menciones</h3>
+                    <p id="total-mentions">4 Áreas Técnicas</p>
+                </div>
+                <div class="card" data-section="sections" style="cursor: pointer;">
+                    <i class="bx bx-file"></i>
+                    <h3>Secciones</h3>
+                    <p id="total-sections-home">0 Asignadas</p>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ESTUDIANTES -->
+        <section id="students-section" class="content-section">
+            <div class="list-card">
+                <div class="panel-header-premium">
+                    <div class="panel-title-premium">
+                        <i class='bx bx-user-pin'></i> Mis Estudiantes
+                    </div>
+                    <div class="search-toolbar-premium">
+                        <div class="search-box-premium">
+                            <i class='bx bx-search'></i>
+                            <input type="text" id="search-prof-student-input" placeholder="Buscar por nombre, cédula…" oninput="onProfStudentSearch(this.value)">
+                            <button class="search-clear-btn" id="clear-prof-student-btn" onclick="clearProfStudentSearch()" style="display:none;"><i class='bx bx-x'></i></button>
+                        </div>
+                        <select id="student-mention-filter" class="search-filter-select" onchange="renderStudents()">
+                            <option value="">Todas las menciones</option>
+                        </select>
+                        <select id="student-section-filter" class="search-filter-select" onchange="renderStudents()">
+                            <option value="">Todas las secciones</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th><i class='bx bx-user' style="vertical-align:middle;margin-right:5px;"></i>Estudiante</th>
+                                <th><i class='bx bx-grid' style="vertical-align:middle;margin-right:5px;"></i>Sección</th>
+                                <th style="text-align:center;">1er Momento</th>
+                                <th style="text-align:center;">2do Momento</th>
+                                <th style="text-align:center;">3er Momento</th>
+                                <th style="text-align:center;"><i class='bx bx-line-chart' style="vertical-align:middle;margin-right:5px;"></i>Definitiva final</th>
+                                <th style="text-align:center;"><i class='bx bx-trophy' style="vertical-align:middle;margin-right:5px;"></i>Lugar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="students-list-body">
+                            <tr><td colspan="7" style="text-align:center;padding:3.5rem 2rem;color:#94a3b8;">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- MENCIONES -->
+        <section id="mentions-section" class="content-section">
+            <div class="header-section" style="margin-bottom: 1.5rem;">
+                <div>
+                    <h2 style="display:flex;align-items:center;gap:0.6rem;color:#1e293b;">
+                        <i class='bx bx-category' style="color:#4a151b;font-size:1.6rem;"></i>
+                        Menciones Técnicas
+                    </h2>
+                    <p style="color:#64748b;font-size:0.88rem;margin-top:4px;">Monitoreo ejecutivo de matrícula, cobertura académica y rendimiento por especialidad</p>
+                </div>
+            </div>
+
+            <div class="mentions-master-detail">
+                <!-- Selector Izquierdo (Menciones) -->
+                <div class="mentions-sidebar-list" id="mentions-sidebar-list">
+                    <!-- Generado dinámicamente -->
+                </div>
+
+                <!-- Panel Detalle Derecho -->
+                <div class="mention-detail-panel" id="mention-detail-panel">
+                    <!-- Generado dinámicamente -->
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIONES Y AÑOS -->
+        <section id="sections-section" class="content-section">
+            <div class="list-card">
+                <div class="panel-header-premium">
+                    <div class="panel-title-premium">
+                        <i class='bx bx-grid'></i> Secciones y Años
+                    </div>
+                    <div class="search-toolbar-premium">
+                        <select id="mention-filter" class="search-filter-select">
+                            <option value="">Todas las menciones</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="sections-cards-container" class="sections-tabs-wrapper">
+                    <!-- renderizado por JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- MODAL DETALLE DE SECCIÓN -->
+        <div class="modal-overlay" id="section-detail-overlay" style="display:none;">
+            <div class="modal-container" style="max-width: 800px; width: 95%;">
+                <div class="modal-header">
+                    <h3><i class='bx bx-grid'></i> <span id="detail-section-title">Detalle de Sección</span></h3>
+                    <button class="modal-close" id="close-section-detail-btn">&times;</button>
+                </div>
+                <div class="modal-body" style="padding: 1.5rem;">
+                    <!-- Cabecera de información -->
+                    <div class="detail-header-info" style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border: 1px solid #e2e8f0; flex-wrap: wrap; gap: 10px;">
+                        <div>
+                            <h4 id="detail-section-name" style="margin: 0; font-size: 1.3rem; color: #1e293b;">-</h4>
+                            <p id="detail-section-mention" style="margin: 3px 0 0; color: #64748b; font-size: 0.9rem;">Mención: -</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <span id="detail-section-guide" class="status-active" style="display: inline-block;">Profesor Guía: -</span>
+                        </div>
+                    </div>
+
+                    <!-- Pestañas internas -->
+                    <div class="modal-tabs" style="display: flex; gap: 10px; border-bottom: 1px solid #e2e8f0; margin-bottom: 1.5rem; padding-bottom: 5px;">
+                        <button class="modal-tab active" id="tab-btn-students" style="padding: 0.5rem 1rem; border: none; background: none; font-weight: 600; cursor: pointer; color: #4a151b; border-bottom: 3px solid #4a151b; font-family: inherit;">
+                            <i class='bx bx-user-pin'></i> Estudiantes Inscritos (<span id="detail-students-count">0</span>)
+                        </button>
+                        <button class="modal-tab" id="tab-btn-teachers" style="padding: 0.5rem 1rem; border: none; background: none; font-weight: 500; cursor: pointer; color: #64748b; font-family: inherit;">
+                            <i class='bx bx-briefcase'></i> Profesores y Asignaturas (<span id="detail-teachers-count">0</span>)
+                        </button>
+                    </div>
+
+                    <!-- Contenido Pestaña Estudiantes -->
+                    <div id="detail-tab-students-content">
+                        <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
+                            <table style="margin-top: 0; width: 100%;">
+                                <thead>
+                                    <tr>
+                                        <th>Cédula</th>
+                                        <th>Nombre y Apellido</th>
+                                        <th>Email</th>
+                                        <th>Teléfono</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="detail-students-tbody">
+                                    <!-- Dinámico -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Contenido Pestaña Profesores -->
+                    <div id="detail-tab-teachers-content" style="display: none;">
+                        <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
+                            <table style="margin-top: 0; width: 100%;">
+                                <thead>
+                                    <tr>
+                                        <th>Profesor</th>
+                                        <th>Materia</th>
+                                        <th>Contacto</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="detail-teachers-tbody">
+                                    <!-- Dinámico -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" id="close-section-detail-btn-footer">Cerrar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- REGISTRO DE NOTAS (CON PERÍODO) -->
+        <section id="grades-section" class="content-section">
+            <div class="header-section">
+                <h2><i class='bx bx-edit-alt'></i> Registro de Calificaciones</h2>
+                <div>
+                    <button class="btn-primary" id="save-grades-btn">
+                        <i class='bx bx-save'></i> Guardar Calificaciones
+                    </button>
+                </div>
+            </div>
+
+            <div class="filter-container">
+                <div class="form-group">
+                    <label><i class='bx bx-calendar'></i> Período Escolar</label>
+                    <select id="grade-periodo" class="filter-select">
+                        <!-- Se llena dinámicamente desde grados-maestros-prof.js -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label><i class='bx bx-category'></i> Mención</label>
+                    <select id="mention-select" class="filter-select"></select>
+                </div>
+                <div class="form-group">
+                    <label><i class='bx bx-grid'></i> Año/Sección</label>
+                    <select id="section-select" class="filter-select"></select>
+                </div>
+                <div class="form-group">
+                    <label><i class='bx bx-book-open'></i> Asignatura</label>
+                    <select id="subject-select" class="filter-select">
+                        <option value="">Seleccione una asignatura</option>
+                    </select>
+                </div>
+                <div class="form-group" style="display: flex; align-items: flex-end;">
+                    <button class="btn-primary" id="load-students-btn">
+                        <i class='bx bx-show'></i> Cargar Estudiantes
+                    </button>
+                </div>
+            </div>
+
+            <!-- RESUMEN DEL VACIADO -->
+            <div class="grades-summary" id="grades-summary">
+                <div class="gs-item"><span>Estudiantes</span><b id="gs-total">0</b></div>
+                <div class="gs-item"><span>Promedio</span><b id="gs-promedio">—</b></div>
+                <div class="gs-item"><span>Aprobados</span><b id="gs-aprobados" class="ok">0</b></div>
+                <div class="gs-item"><span>Reprobados</span><b id="gs-reprobados" class="mal">0</b></div>
+                <div class="gs-item"><span>Sin calificar</span><b id="gs-sin">0</b></div>
+            </div>
+
+            <style>
+                .grades-summary {
+                    display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                    gap: 0.6rem; margin-bottom: 1rem;
+                }
+                .grades-summary .gs-item {
+                    background: #f8fafc; border: 1px solid #eef2f7; border-radius: 9px; padding: 0.55rem 0.85rem;
+                }
+                .grades-summary .gs-item span {
+                    display: block; font-size: 0.64rem; text-transform: uppercase;
+                    letter-spacing: 0.06em; color: #94a3b8; font-weight: 700;
+                }
+                .grades-summary .gs-item b { font-size: 1.15rem; font-variant-numeric: tabular-nums; color: #1e293b; }
+                .grades-summary .gs-item b.ok { color: #047857; }
+                .grades-summary .gs-item b.mal { color: #b91c1c; }
+
+                .grades-table .th-momento {
+                    display: flex; align-items: center; justify-content: center; gap: 4px;
+                }
+                .grades-table .est-celda { display: flex; flex-direction: column; line-height: 1.25; }
+                .grades-table .est-celda b { font-weight: 600; color: #1e293b; }
+                .grades-table .est-celda small { color: #94a3b8; font-size: 0.74rem; }
+                .grades-table .momento-celda { text-align: center; }
+                .grades-table .momento-celda .grade-input {
+                    display: block; width: 100%; max-width: 84px; margin: 0 auto;
+                    border: 1px solid #e2e8f0; border-radius: 7px; padding: 0.3rem 0.4rem;
+                    font-family: inherit; font-size: 0.92rem; font-weight: 700; text-align: center;
+                    color: #334155; background: #fff; font-variant-numeric: tabular-nums;
+                }
+                .grades-table .momento-celda .grade-input.ok { color: #047857; }
+                .grades-table .momento-celda .grade-input.mal { color: #b91c1c; }
+                .grades-table .momento-celda .grade-input.vacia { color: #cbd5e1; font-weight: 500; }
+                .grades-table .momento-celda .grade-input:disabled { background: #fbfcfe; }
+                .grades-table .momento-celda .inas-input {
+                    display: block; width: 56px; margin: 0.2rem auto 0;
+                    border: 1px dashed #e2e8f0; border-radius: 6px; padding: 0.15rem 0.25rem;
+                    font-family: inherit; font-size: 0.7rem; text-align: center; color: #94a3b8;
+                    background: transparent; font-variant-numeric: tabular-nums;
+                }
+                .grades-table .momento-celda .inas-input:disabled { background: transparent; }
+                .grades-table .def-celda { text-align: center; }
+                .grades-table .def-valor {
+                    font-weight: 700; font-size: 0.98rem; font-variant-numeric: tabular-nums;
+                }
+                .grades-table .def-valor.ok { color: #047857; }
+                .grades-table .def-valor.mal { color: #b91c1c; }
+                .grades-table .def-valor.vacia { color: #cbd5e1; font-weight: 500; }
+                .grades-table .acciones-celda { text-align: center; }
+            </style>
+
+            <div class="list-card">
+                <div class="table-responsive">
+                    <table class="grades-table">
+                        <thead>
+                            <tr>
+                                <th>Cédula</th>
+                                <th>Nombre del Estudiante</th>
+                                <th>M.P.1</th>
+                                <th>Inas</th>
+                                <th>M.P.2</th>
+                                <th>Inas</th>
+                                <th>M.P.3</th>
+                                <th>Inas</th>
+                                <th>Definitiva</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="grades-tbody">
+                            <tr>
+                                <td colspan="11" class="empty-msg">
+                                    <i class='bx bx-info-circle'></i>
+                                    Seleccione una sección y asignatura para cargar los estudiantes
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- REPORTE DE NOTAS POR CÉDULA -->
+        <!-- REPORTES -->
+        <section id="student-report-section" class="content-section">
+            <div class="header-section">
+                <h2><i class='bx bx-printer'></i> Reportes</h2>
+            </div>
+
+            <div class="rep-cards" id="rep-cards">
+                <button type="button" class="rep-card" data-doc="boletin-est">
+                    <i class='bx bx-file'></i>
+                    <b>Boletín individual</b>
+                    <span>Notas del momento e historial de los tres momentos.</span>
+                </button>
+                <button type="button" class="rep-card" data-doc="historico-est">
+                    <i class='bx bx-history'></i>
+                    <b>Histórico individual</b>
+                    <span>Todas las materias y todos los períodos del estudiante.</span>
+                </button>
+                <button type="button" class="rep-card" data-doc="evaluaciones">
+                    <i class='bx bx-list-check'></i>
+                    <b>Boletín de evaluaciones</b>
+                    <span>Notas de cada evaluación que cargaron los profesores.</span>
+                </button>
+                <button type="button" class="rep-card" data-doc="evaluaciones-sec">
+                    <i class='bx bx-table'></i>
+                    <b>Evaluaciones de la sección</b>
+                    <span>Notas de cada evaluación con todos los alumnos de la sección.</span>
+                </button>
+                <button type="button" class="rep-card" data-doc="momentos-sec">
+                    <i class='bx bx-grid-alt'></i>
+                    <b>Histórico de momentos</b>
+                    <span>Los tres momentos de cada materia, para toda la sección.</span>
+                </button>
+                <button type="button" class="rep-card" data-doc="historico-sec">
+                    <i class='bx bx-table'></i>
+                    <b>Histórico de la sección</b>
+                    <span>Tabla consolidada de alumnos y materias del período.</span>
+                </button>
+            </div>
+
+            <div class="rep-form" id="rep-form">
+                <div class="rep-campo">
+                    <label>Período</label>
+                    <select id="rep-periodo" class="filter-select"></select>
+                </div>
+                <div class="rep-campo">
+                    <label>Mención</label>
+                    <select id="rep-mencion" class="filter-select"></select>
+                </div>
+                <div class="rep-campo">
+                    <label>Sección</label>
+                    <select id="rep-seccion" class="filter-select"></select>
+                </div>
+                <div class="rep-campo" id="rep-campo-estudiante">
+                    <label>Estudiante</label>
+                    <div class="rep-buscador">
+                        <input type="text" id="rep-buscar" class="filter-select" placeholder="Cédula o nombre…" autocomplete="off">
+                        <div class="rep-lista" id="rep-lista"></div>
+                    </div>
+                </div>
+                <div class="rep-campo" style="display: flex; align-items: flex-end;">
+                    <button type="button" class="btn-primary" id="rep-generar">
+                        <i class='bx bx-show'></i> Ver vista previa
+                    </button>
+                </div>
+            </div>
+
+            <div id="rep-aviso"></div>
+        </section>
+
+        <!-- SECTION DETAIL MODAL -->
+        <div class="modal-overlay" id="section-detail-modal-overlay">
+            <div class="modal-container" style="max-width: 900px; width: 95%;">
+                <div class="modal-header">
+                    <h3 id="section-detail-modal-title">Detalles de la Sección</h3>
+                    <button class="modal-close" onclick="closeSectionDetailModal()"><i class='bx bx-x'></i></button>
+                </div>
+                <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                    <div class="section-detail-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                        <!-- Columna Estudiantes -->
+                        <div class="students-panel">
+                            <h3 style="margin-bottom: 1rem; border-bottom: 2px solid var(--sidebar-bg, #4a151b); padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+                                <span><i class='bx bx-user'></i> Estudiantes Inscritos</span>
+                                <span class="badge" id="sd-students-count" style="background: var(--sidebar-bg, #4a151b); color: white; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.8rem;">0</span>
+                            </h3>
+                            <div id="sd-students-list" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                                <!-- Students will be rendered here -->
+                            </div>
+                        </div>
+                        <!-- Columna Profesores y Materias -->
+                        <div class="teachers-panel">
+                            <h3 style="margin-bottom: 1rem; border-bottom: 2px solid var(--sidebar-bg, #4a151b); padding-bottom: 0.5rem;">
+                                <i class='bx bx-chalkboard'></i> Profesores y Materias
+                            </h3>
+                            <div id="sd-guide-teacher" style="margin-bottom: 1rem; padding: 0.75rem; background: var(--bg-light); border-radius: 8px; border-left: 4px solid var(--sidebar-bg, #4a151b); display: flex; align-items: center; gap: 0.5rem;">
+                                <i class='bx bx-star' style="color: #f59e0b; font-size: 1.2rem;"></i>
+                                <div>
+                                    <strong style="display: block; font-size: 0.8rem; color: #666;">Profesor Guía</strong>
+                                    <span id="sd-guide-teacher-name" style="font-weight: 500;">No asignado</span>
+                                </div>
+                            </div>
+                            <div id="sd-teachers-list" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                                <!-- Teachers will be rendered here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             SECCIÓN: CONFIGURACIÓN DE EVALUACIONES
+             ═══════════════════════════════════════════════════════════ -->
+        <section id="evaluaciones-section" class="content-section">
+            <div class="header-section">
+                <div>
+                    <h2><i class='bx bx-bar-chart-alt-2'></i> Configuración de Evaluaciones</h2>
+                    <p style="color:#64748b;font-size:0.88rem;margin-top:4px;">
+                        Define cuántas evaluaciones tendrá cada Momento Pedagógico y qué porcentaje aporta cada una.
+                    </p>
+                </div>
+                <button class="btn-primary" id="eval-header-open-btn" style="display:flex;align-items:center;gap:0.5rem;padding:0.75rem 1.4rem;">
+                    <i class='bx bx-plus-circle'></i> Nueva Configuración
+                </button>
+            </div>
+
+            <!-- Barra de filtros para crear nueva config -->
+            <div class="eval-controls-bar">
+                <div class="form-group">
+                    <label><i class='bx bx-grid'></i> Sección</label>
+                    <select id="eval-new-seccion">
+                        <option value="">-- Sección --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label><i class='bx bx-book-open'></i> Materia</label>
+                    <select id="eval-new-materia">
+                        <option value="">-- Materia --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label><i class='bx bx-calendar'></i> Período</label>
+                    <select id="eval-new-periodo">
+                        <option value="">-- Período --</option>
+                    </select>
+                </div>
+                <div class="form-group" style="display:flex;align-items:flex-end;">
+                    <button class="btn-primary" id="eval-new-config-btn" style="white-space:nowrap;">
+                        <i class='bx bx-cog'></i> Configurar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabla resumen de configuraciones -->
+            <div class="list-card">
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Sección</th>
+                                <th>Materia</th>
+                                <th>Período</th>
+                                <th>Estado por Momento</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="eval-config-tbody">
+                            <tr><td colspan="5" class="empty-msg"><i class='bx bx-info-circle'></i> Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         MODAL: CONFIGURACIÓN DE EVALUACIONES
+         ═══════════════════════════════════════════════════════════ -->
+    <div id="eval-config-modal" class="modal-overlay">
+        <div class="modal-container" style="max-width:680px;width:96%;">
+            <div class="modal-header">
+                <div>
+                    <h3><i class='bx bx-bar-chart-alt-2'></i> Configurar Evaluaciones</h3>
+                    <span id="eval-modal-title-detail"></span>
+                </div>
+                <button class="modal-close" id="eval-modal-close">&times;</button>
+            </div>
+
+            <!-- Tabs de Momentos -->
+            <div class="eval-momentos-tabs">
+                <button class="eval-momento-tab active" data-momento="1">
+                    <i class='bx bx-time-five'></i> 1er Momento
+                    <span class="eval-tab-check" id="eval-tab-check-1">1</span>
+                </button>
+                <button class="eval-momento-tab" data-momento="2">
+                    <i class='bx bx-time-five'></i> 2do Momento
+                    <span class="eval-tab-check" id="eval-tab-check-2">2</span>
+                </button>
+                <button class="eval-momento-tab" data-momento="3">
+                    <i class='bx bx-time-five'></i> 3er Momento
+                    <span class="eval-tab-check" id="eval-tab-check-3">3</span>
+                </button>
+            </div>
+
+            <!-- Editor dinámico del momento activo -->
+            <div class="modal-body" style="padding:0;">
+                <div id="eval-momento-editor"></div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-secondary" id="eval-modal-cancel">Cancelar</button>
+                <button class="btn-primary" id="eval-save-all-btn">
+                    <i class='bx bx-save'></i> Guardar Configuración
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         MODAL: CALIFICAR EVALUACIONES DE ESTUDIANTES
+         ═══════════════════════════════════════════════════════════ -->
+    <div id="eval-grading-modal" class="modal-overlay">
+        <div class="modal-container" style="max-width:960px;width:96%;max-height:92vh;display:flex;flex-direction:column;">
+            <div class="modal-header">
+                <div>
+                    <h3 style="display:flex;align-items:center;gap:0.5rem;">
+                        <i class='bx bx-spreadsheet'></i> Calificar Evaluaciones de Estudiantes
+                    </h3>
+                    <span id="eval-grading-subtitle" style="font-size:0.85rem;color:#cbd5e1;margin-top:2px;display:block;"></span>
+                </div>
+                <button class="modal-close" id="eval-grading-close">&times;</button>
+            </div>
+
+            <!-- Selector de Momento -->
+            <div class="eval-momentos-tabs" style="border-bottom:1px solid #e2e8f0;background:#f8fafc;padding:0.5rem 1rem 0;">
+                <button type="button" class="eval-grading-momento-tab active" data-momento="1">
+                    <i class='bx bx-time-five'></i> 1er Momento
+                </button>
+                <button type="button" class="eval-grading-momento-tab" data-momento="2">
+                    <i class='bx bx-time-five'></i> 2do Momento
+                </button>
+                <button type="button" class="eval-grading-momento-tab" data-momento="3">
+                    <i class='bx bx-time-five'></i> 3er Momento
+                </button>
+            </div>
+
+            <!-- Información de evaluaciones configuradas para este momento -->
+            <div id="eval-grading-info-bar" style="background:#eff6ff;border-bottom:1px solid #bfdbfe;padding:0.6rem 1.25rem;font-size:0.85rem;color:#1e40af;display:flex;flex-wrap:wrap;gap:0.75rem;align-items:center;">
+                <!-- Dinámico -->
+            </div>
+
+            <div class="modal-body" style="padding:1rem 1.25rem;overflow-y:auto;flex:1;">
+                <div class="table-responsive">
+                    <table class="grades-table" style="width:100%;border-collapse:collapse;">
+                        <thead id="eval-grading-thead">
+                            <!-- Columnas dinámicas según el número de evaluaciones -->
+                        </thead>
+                        <tbody id="eval-grading-tbody">
+                            <!-- Filas de estudiantes -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="modal-footer" style="display:flex;justify-content:space-between;align-items:center;padding:0.85rem 1.25rem;background:#f8fafc;border-top:1px solid #e2e8f0;flex-wrap:wrap;gap:0.75rem;">
+                <div style="font-size:0.82rem;color:#64748b;">
+                    <i class='bx bx-info-circle'></i> Cada evaluación se califica de <strong>0 a 20 puntos</strong>. El resultado final se calcula automáticamente y se refleja en <strong>Vaciado de Notas</strong>.
+                </div>
+                <div style="display:flex;gap:0.5rem;">
+                    <button type="button" class="btn-secondary" id="eval-grading-cancel">Cancelar</button>
+                    <button type="button" class="btn-primary" id="eval-grading-save-btn" style="display:flex;align-items:center;gap:0.4rem;">
+                        <i class='bx bx-save'></i> Guardar y Aplicar a Vaciado de Notas
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         MODAL: ACERCA DE
+         ═══════════════════════════════════════════════════════════ -->
+    <div id="about-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-container" style="max-width:780px;width:97%;max-height:92vh;display:flex;flex-direction:column;">
+
+            <!-- HERO HEADER -->
+            <div class="about-modal-hero" style="flex-shrink:0;">
+                <img src="../lib/recursos/logo ali.png" alt="Logo" class="about-modal-logo">
+                <h2>Sistema de Control de Estudios</h2>
+                <p>Escuela Técnica Robinsoniana y Zamorana "Alí Primera"</p>
+                <div class="about-badges-row">
+                    <span class="about-pill"><i class='bx bx-git-branch'></i> Versión 1.0</span>
+                    <span class="about-pill"><i class='bx bx-calendar'></i> Año Escolar 2026-2027</span>
+                </div>
+            </div>
+
+            <!-- TABS NAV -->
+            <div class="about-tabs-nav" style="display:flex;border-bottom:2px solid #e2e8f0;background:#f8fafc;flex-shrink:0;">
+                <button class="about-tab-btn active" data-tab="tab-info" style="flex:1;padding:0.75rem 1rem;border:none;background:none;cursor:pointer;font-weight:600;font-size:0.85rem;color:#4a151b;border-bottom:3px solid #4a151b;transition:all .2s;">
+                    <i class='bx bx-info-circle'></i> Acerca del Sistema
+                </button>
+                <button class="about-tab-btn" data-tab="tab-guide" style="flex:1;padding:0.75rem 1rem;border:none;background:none;cursor:pointer;font-weight:600;font-size:0.85rem;color:#64748b;border-bottom:3px solid transparent;transition:all .2s;">
+                    <i class='bx bx-book-open'></i> Guía de Usuario
+                </button>
+            </div>
+
+            <!-- SCROLLABLE CONTENT AREA -->
+            <div style="overflow-y:auto;flex:1;min-height:0;">
+
+                <!-- ═══ TAB 1: ACERCA DE ═══ -->
+                <div id="tab-info" class="about-tab-panel" style="display:block;">
+                    <div class="about-modal-body">
+                        <div class="about-section-block">
+                            <h4 class="about-section-title"><i class='bx bx-bulb'></i> Propósito del Sistema</h4>
+                            <p style="font-size:0.86rem;line-height:1.6;color:#475569;margin:0;">
+                                Herramienta integral desarrollada para automatizar, agilizar y transparentar los procesos académicos institucionales: matriculación de estudiantes, asignación docente por menciones, planificación y ponderación de evaluaciones al 100%, registro de calificaciones y emisión de reportes oficiales.
+                            </p>
+                        </div>
+
+                        <div class="about-section-block">
+                            <h4 class="about-section-title"><i class='bx bx-grid-alt'></i> Características Principales</h4>
+                            <div class="about-features-grid">
+                                <div class="about-feature-card">
+                                    <div class="about-feature-icon"><i class='bx bx-bar-chart-alt-2'></i></div>
+                                    <div class="about-feature-text">
+                                        <h5>Evaluaciones 100%</h5>
+                                        <p>Configuración de hasta 7 evaluaciones por momento pedagógico con suma exacta al 100%.</p>
+                                    </div>
+                                </div>
+                                <div class="about-feature-card">
+                                    <div class="about-feature-icon"><i class='bx bx-calendar-event'></i></div>
+                                    <div class="about-feature-text">
+                                        <h5>Momentos MP1, MP2, MP3</h5>
+                                        <p>Control estricto de fechas de vaciado y cálculo ponderado de definitivas.</p>
+                                    </div>
+                                </div>
+                                <div class="about-feature-card">
+                                    <div class="about-feature-icon"><i class='bx bx-user-check'></i></div>
+                                    <div class="about-feature-text">
+                                        <h5>Roles Diferenciados</h5>
+                                        <p>Paneles independientes y adaptados para Administradores, Profesores y Superadministrador.</p>
+                                    </div>
+                                </div>
+                                <div class="about-feature-card">
+                                    <div class="about-feature-icon"><i class='bx bx-printer'></i></div>
+                                    <div class="about-feature-text">
+                                        <h5>Reportes y Boletines</h5>
+                                        <p>Generación de actas de notas, historiales por estudiante y reportes imprimibles.</p>
+                                    </div>
+                                </div>
+                                <div class="about-feature-card">
+                                    <div class="about-feature-icon"><i class='bx bx-database'></i></div>
+                                    <div class="about-feature-text">
+                                        <h5>Respaldos MySQL</h5>
+                                        <p>Consola de mantenimiento, respaldo .SQL automático, optimización e indexado InnoDB.</p>
+                                    </div>
+                                </div>
+                                <div class="about-feature-card">
+                                    <div class="about-feature-icon"><i class='bx bx-shield-quarter'></i></div>
+                                    <div class="about-feature-text">
+                                        <h5>Seguridad y Auditoría</h5>
+                                        <p>Actas congeladas al cierre de año. Inhabilitación sin pérdida de historial. Formato MAYÚSCULAS ministerial.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="about-section-block">
+                            <h4 class="about-section-title"><i class='bx bx-code-alt'></i> Tecnologías</h4>
+                            <div class="about-tech-stack">
+                                <span class="about-tech-badge">PHP 7 / 8</span>
+                                <span class="about-tech-badge">MySQL / MariaDB</span>
+                                <span class="about-tech-badge">JavaScript (ES6+)</span>
+                                <span class="about-tech-badge">CSS3 Vanilla</span>
+                                <span class="about-tech-badge">Boxicons</span>
+                                <span class="about-tech-badge">Apache HTTP Server</span>
+                            </div>
+                        </div>
+
+                        <div class="about-section-block">
+                            <h4 class="about-section-title"><i class='bx bx-buildings'></i> Créditos Institucionales</h4>
+                            <div class="about-credits-box">
+                                <strong>Escuela Técnica Robinsoniana "Alí Primera"</strong><br>
+                                Departamento de Control de Estudios y Sistemas<br>
+                                Para soporte o incidencias: <a href="mailto:leonardojps2709@gmail.com" style="color:#4a151b;font-weight:600;">leonardojps2709@gmail.com</a>
+                            </div>
+                        </div>
+                    </div>
+                </div><!-- /tab-info -->
+
+                <!-- ═══ TAB 2: GUÍA DE USUARIO ═══ -->
+                <div id="tab-guide" class="about-tab-panel" style="display:none;">
+                    <div style="padding:1.5rem;font-size:0.84rem;color:#334155;line-height:1.65;">
+
+                        <!-- Encabezado institucional -->
+                        <div style="text-align:center;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:2px solid #f1f5f9;">
+                            <p style="font-size:0.75rem;color:#94a3b8;margin:0;">REPÚBLICA BOLIVARIANA DE VENEZUELA · MINISTERIO DEL PODER POPULAR PARA LA EDUCACIÓN</p>
+                            <h3 style="margin:0.4rem 0 0.2rem;color:#1e293b;font-size:1rem;">MANUAL DE USUARIO INTEGRAL DEL SISTEMA ESCOLAR</h3>
+                            <p style="margin:0;color:#64748b;font-size:0.8rem;">Guía Operativa Paso a Paso · Actualizado con Evaluaciones 100% sobre 20 Puntos, Calculadora de Vaciado, Reseteo de Claves y Mantenimiento MySQL</p>
+                        </div>
+
+                        <!-- Índice rápido -->
+                        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:1rem;margin-bottom:1.5rem;">
+                            <p style="font-weight:700;margin:0 0 0.5rem;color:#4a151b;font-size:0.85rem;"><i class='bx bx-list-ul'></i> Contenido</p>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.2rem 1rem;font-size:0.8rem;">
+                                <a href="#prof-guide-sec1" style="color:#4a151b;text-decoration:none;">1. Bienvenida y Perfiles</a>
+                                <a href="#prof-guide-sec2" style="color:#4a151b;text-decoration:none;">2. Conceptos Clave</a>
+                                <a href="#prof-guide-sec3" style="color:#4a151b;text-decoration:none;">3. Autenticación</a>
+                                <a href="#prof-guide-sec4" style="color:#4a151b;text-decoration:none;">4. Módulo Docente</a>
+                                <a href="#prof-guide-sec5" style="color:#4a151b;text-decoration:none;">5. Módulo Administrador</a>
+                                <a href="#prof-guide-sec6" style="color:#4a151b;text-decoration:none;">6. Módulo Superadmin</a>
+                                <a href="#prof-guide-sec7" style="color:#4a151b;text-decoration:none;">7. Preguntas Frecuentes</a>
+                                <a href="#prof-guide-sec8" style="color:#4a151b;text-decoration:none;">8. Buenas Prácticas</a>
+                            </div>
+                        </div>
+
+                        <!-- ── SECCIÓN 1 ── -->
+                        <h3 id="prof-guide-sec1" style="color:#4a151b;border-left:4px solid #4a151b;padding-left:0.6rem;font-size:0.95rem;margin:1.5rem 0 0.75rem;">1. Bienvenido al Sistema Escolar E.T.R. "Alí Primera"</h3>
+                        <p>El Sistema Escolar de la Escuela Técnica Robinsoniana "Alí Primera" es la plataforma web institucional desarrollada para transformar y automatizar la gestión académica, la matrícula escolar, la planificación evaluativa por competencias técnicas y la emisión de sábanas y boletines oficiales bajo la normativa del MPPE.</p>
+
+                        <h4 style="color:#1e293b;font-size:0.88rem;margin:1rem 0 0.4rem;">1.1. Perfiles de Usuario y Alcance Operativo</h4>
+                        <p>El sistema divide su operativa en <strong>tres niveles de acceso</strong>:</p>
+                        <ul style="margin:0.4rem 0 0.8rem;padding-left:1.4rem;">
+                            <li style="margin-bottom:0.5rem;"><strong style="color:#4a151b;">Docente / Profesor:</strong> Consultar secciones asignadas, revisar nómina de estudiantes, planificar evaluaciones al 100% sobre la escala de 20 puntos, calificar con calculadora interactiva, vaciar notas y emitir boletines.</li>
+                            <li style="margin-bottom:0.5rem;"><strong style="color:#4a151b;">Administrador (Control de Estudios):</strong> Matricular estudiantes en MAYÚSCULAS, inhabilitar o reactivar matrículas, registrar profesores con contraseña y carga académica, gestionar secciones y menciones, emitir sábanas y controlar períodos escolares.</li>
+                            <li style="margin-bottom:0.5rem;"><strong style="color:#4a151b;">Superadministrador:</strong> Supervisar cuentas directivas, auditar docentes (inhabilitación y cambio de clave de emergencia), aplicar filtros dinámicos a la matrícula y administrar el motor MySQL (respaldos, optimización, restauración).</li>
+                        </ul>
+
+                        <h4 style="color:#1e293b;font-size:0.88rem;margin:1rem 0 0.4rem;">1.2. Requisitos Técnicos y Consejos de Navegación</h4>
+                        <ul style="margin:0.4rem 0 0.8rem;padding-left:1.4rem;">
+                            <li><strong>Navegador Web:</strong> Google Chrome, Microsoft Edge, Mozilla Firefox u Opera (versiones recientes).</li>
+                            <li><strong>Resolución de Pantalla:</strong> 1366 × 768 px o superior.</li>
+                            <li><strong>Sesión:</strong> El sistema usa <code>sessionStorage</code>. Si cierras la pestaña, la sesión se cierra automáticamente.</li>
+                        </ul>
+
+                        <!-- ── SECCIÓN 2 ── -->
+                        <h3 id="prof-guide-sec2" style="color:#4a151b;border-left:4px solid #4a151b;padding-left:0.6rem;font-size:0.95rem;margin:1.5rem 0 0.75rem;">2. Conceptos Clave y Reglas Operativas</h3>
+                        <ul style="margin:0.4rem 0 0.8rem;padding-left:1.4rem;">
+                            <li style="margin-bottom:0.4rem;"><strong>Escala Ministerial de 20 Puntos:</strong> La nota va de 0 a 20. Mínimo aprobatorio: 10 puntos.</li>
+                            <li style="margin-bottom:0.4rem;"><strong>Momentos Pedagógicos (MP1, MP2, MP3):</strong> El año escolar se divide en tres lapsos evaluativos, cada uno con sábana, fecha de cierre y plan de evaluación.</li>
+                            <li style="margin-bottom:0.4rem;"><strong>Planificación al 100%:</strong> La suma exacta de los porcentajes de las actividades debe ser 100%. El sistema calcula la equivalencia en puntos sobre 20 (ej.: 25% = 5.0 pts).</li>
+                            <li style="margin-bottom:0.4rem;"><strong>Formato MAYÚSCULAS:</strong> Nombres y apellidos de alumnos son transformados automáticamente a MAYÚSCULAS para cumplir estándares del MPPE.</li>
+                            <li style="margin-bottom:0.4rem;"><strong>Actas Inmutables:</strong> Al finalizar el período, el Administrador congela el año. Las calificaciones pasan a solo-lectura.</li>
+                            <li style="margin-bottom:0.4rem;"><strong>Inhabilitación de Matrícula:</strong> Suspende acceso del alumno sin borrar su historial ni calificaciones.</li>
+                        </ul>
+
+                        <!-- ── SECCIÓN 3 ── -->
+                        <h3 id="prof-guide-sec3" style="color:#4a151b;border-left:4px solid #4a151b;padding-left:0.6rem;font-size:0.95rem;margin:1.5rem 0 0.75rem;">3. Primer Ingreso y Autenticación</h3>
+
+                        <div style="background:#fef9f0;border-left:4px solid #f59e0b;border-radius:4px;padding:0.75rem 1rem;margin-bottom:1rem;">
+                            <p style="margin:0;font-size:0.82rem;"><strong>URL institucional:</strong> <code>http://localhost/Proyecto/login/bienvenida.html</code></p>
+                        </div>
+
+                        <h4 style="color:#1e293b;font-size:0.88rem;margin:1rem 0 0.4rem;">3.1. Pantalla de Bienvenida y Selección de Rol</h4>
+                        <p>Al abrir el sistema verás dos botones: <strong style="color:#4a151b;">PROFESOR</strong> (personal docente) y <strong style="color:#4a151b;">ADMINISTRADOR</strong> (control de estudios/directivos). Haz clic sobre tu perfil.</p>
+
+                        <h4 style="color:#1e293b;font-size:0.88rem;margin:1rem 0 0.4rem;">3.2. Inicio de Sesión como Administrador</h4>
+                        <ol style="padding-left:1.4rem;margin:0.4rem 0 0.8rem;">
+                            <li>Introduce tu usuario institucional o cédula (ej. <code>V-31756123</code>).</li>
+                            <li>Escribe tu clave. Usa el icono del ojo para verificar los caracteres.</li>
+                            <li>Haz clic en <strong>"Iniciar Sesión"</strong>. El sistema verifica privilegios y redirige al Panel de Administración.</li>
+                        </ol>
+
+                        <h4 style="color:#1e293b;font-size:0.88rem;margin:1rem 0 0.4rem;">3.3. ¿Olvidaste tu Contraseña?</h4>
+                        <ol style="padding-left:1.4rem;margin:0.4rem 0 0.8rem;">
+                            <li>Haz clic en <strong>"¿Olvidaste tu contraseña?"</strong> debajo del campo de clave.</li>
+                            <li>Ingresa tu cédula o correo institucional.</li>
+                            <li>Presiona <strong>"Enviar"</strong>. Se notificará al Superadministrador para restablecer tu clave.</li>
+                        </ol>
+
+                        <h4 style="color:#1e293b;font-size:0.88rem;margin:1rem 0 0.4rem;">3.4. Inicio de Sesión como Profesor / Docente</h4>
+                        <ol style="padding-left:1.4rem;margin:0.4rem 0 0.8rem;">
+                            <li>En la bienvenida, selecciona <strong>"Profesor"</strong> (o accede a <code>login-maestros.html</code>).</li>
+                            <li>Escribe tu cédula completa con prefijo (ej. <code>V-10000003</code>).</li>
+                            <li>Introduce la contraseña entregada por Control de Estudios.</li>
+                            <li>Presiona <strong>"Acceder como Profesor"</strong>. El panel cargará tus secciones y materias automáticamente.</li>
+                        </ol>
+
+                        <!-- ── SECCIÓN 4 ── -->
+                        <h3 id="prof-guide-sec4" style="color:#4a151b;border-left:4px solid #4a151b;padding-left:0.6rem;font-size:0.95rem;margin:1.5rem 0 0.75rem;">4. Guía Operativa para el Docente / Profesor</h3>
+
+                        <h4 style="color:#1e293b;font-size:0.88rem;margin:1rem 0 0.4rem;">4.1. Panel de Inicio Docente</h4>
+                        <p>Al ingresar encontrarás: saludo personalizado, tarjetas de acceso rápido (<em>Mis Secciones, Estudiantes, Calificaciones, Evaluaciones</em>) y resumen del momento pedagógico activo.</p>
+
+                        <h4 style="color:#1e293b;font-size:0.88rem;margin:1rem 0 0.4rem;">4.2. Consulta de Secciones y Nómina</h4>
+                        <ul style="padding-left:1.4rem;margin:0.4rem 0 0.8rem;">
+                            <li><strong>Mis Secciones:</strong> tarjetas con año, letra, mención técnica y total de alumnos inscritos.</li>
+                            <li><strong>Estudiantes:</strong> filtrar por sección o buscar por cédula / apellido.</li>
+                        </ul>
+
+                        <h4 style="color:#1e293b;font-size:0.88rem;margin:1rem 0 0.4rem;">4.3. Módulo de Evaluaciones (100% sobre 20 Puntos) ★ NUEVO</h4>
+                        <ol style="padding-left:1.4rem;margin:0.4rem 0 0.8rem;">
+                            <li>Haz clic en <strong>"Evaluaciones"</strong> en el menú lateral.</li>
+                            <li>Selecciona Sección, Asignatura y Período en la barra superior.</li>
+                            <li>Presiona <strong>"+ Configurar Evaluaciones"</strong> o el ícono de lápiz.</li>
+                            <li>Elige el Momento Pedagógico (1er, 2do o 3er Momento).</li>
+                            <li>Define cuántas evaluaciones realizarás (1 a 7 actividades).</li>
+                            <li>Escribe el nombre de cada actividad (ej. <em>Taller Práctico, Examen Parcial</em>) e ingresa su porcentaje.</li>
+                            <li>Observa el badge azul con la equivalencia en puntos (ej. 25% = 5.0 pts / 20).</li>
+                            <li>Verifica que la barra total indique <strong>"100% (20.0 / 20 pts)"</strong> y presiona <strong>"Guardar Configuración"</strong>.</li>
+                        </ol>
+
+                        <h4 style="color:#1e293b;font-size:0.88rem;margin:1rem 0 0.4rem;">4.4. Calculadora de Evaluaciones Detalladas ★ NUEVO</h4>
+                        <ol style="padding-left:1.4rem;margin:0.4rem 0 0.8rem;">
+                            <li>Haz clic en el ícono de <strong>calculadora</strong> en la tabla de planes o en la cabecera MP1/MP2/MP3 de la sábana.</li>
+                            <li>Ingresa la nota de cada actividad para cada estudiante (escala 0–20 pts).</li>
+                            <li>El sistema pondera en tiempo real y muestra el badge <span style="color:green;">■ Aprobado</span> (≥ 10) o <span style="color:red;">■ Reprobado</span> (< 10).</li>
+                            <li>Presiona <strong>"Guardar y Aplicar a Vaciado de Notas"</strong>. La nota se transfiere automáticamente a la sábana oficial.</li>
+                        </ol>
+
+                        <h4 style="color:#1e293b;font-size:0.88rem;margin:1rem 0 0.4rem;">4.5. Vaciado de Calificaciones, Inasistencias y Boletines</h4>
+                        <ol style="padding-left:1.4rem;margin:0.4rem 0 0.8rem;">
+                            <li>Ve a <strong>"Registrar Notas"</strong>. Selecciona Período, Mención, Sección y Asignatura.</li>
+                            <li>Haz clic en <strong>"Cargar Estudiantes"</strong>.</li>
+                            <li>Ingresa calificaciones (0–20) e inasistencias. La columna <em>Definitiva Final</em> se actualiza automáticamente.</li>
+                            <li>Presiona <strong>"Guardar Calificaciones"</strong>.</li>
+                            <li>Para boletines: ve a <strong>"Reporte de Notas"</strong>, busca al estudiante y genera la vista previa o impresión.</li>
+                        </ol>
+
+                        <!-- ── SECCIÓN 5 ── -->
+                        <h3 id="prof-guide-sec5" style="color:#4a151b;border-left:4px solid #4a151b;padding-left:0.6rem;font-size:0.95rem;margin:1.5rem 0 0.75rem;">5. Guía para el Administrador (Control de Estudios)</h3>
+
+                        <h4 style="color:#1e293b;font-size:0.88rem;margin:1rem 0 0.4rem;">5.1. Dashboard Principal</h4>
+                        <p>El dashboard muestra: matrícula total, docentes activos, secciones habilitadas y períodos escolares en curso.</p>
+
+                        <h4 style="color:#1e293b;font-size:0.88rem;margin:1rem 0 0.4rem;">5.2. Dar de Alta a un Docente</h4>
+                        <ol style="padding-left:1.4rem;margin:0.4rem 0 0.8rem;">
+                            <li>Ve a <strong>"Usuarios" → "Profesores"</strong> y haz clic en <strong>"+ Nuevo Profesor"</strong>.</li>
+                            <li>Completa Cédula (V/E), Nombres, Apellidos, Teléfono, Email y Contraseña inicial.</li>
+                            <li>En la pestaña <strong>"Materias y Secciones"</strong>, marca las asignaturas y aulas asignadas.</li>
+                            <li>Presiona <strong>"Guardar Profesor"</strong>. El docente podrá iniciar sesión de inmediato.</li>
+                        </ol>
+
+                        <h4 style="color:#1e293b;font-size:0.88rem;margin:1rem 0 0.4rem;">5.3. Crear Secciones, Menciones y Asignaturas</h4>
+                        <ol style="padding-left:1.4rem;margin:0.4rem 0 0.8rem;">
+                            <li>En <strong>"Académico" → "Secciones y Años"</strong>, presiona <strong>"+ Nueva Sección"</strong>.</li>
+                            <li>Selecciona Año (1ro–6to), Letra (A, B, C…) y Mención Técnica.</li>
+                            <li>Asigna el Docente Guía responsable.</li>
+                            <li>Haz clic en el ícono del ojo para ver la lista completa de alumnos y profesores asignados.</li>
+                        </ol>
+
+                        <h4 style="color:#1e293b;font-size:0.88rem;margin:1rem 0 0.4rem;">5.4. Padrón de Estudiantes e Inhabilitación</h4>
+                        <ol style="padding-left:1.4rem;margin:0.4rem 0 0.8rem;">
+                            <li>En <strong>"Académico" → "Estudiantes"</strong>, haz clic en <strong>"+ Nuevo Estudiante"</strong>.</li>
+                            <li>Ingresa Cédula (con validación de duplicados), Nombres y Apellidos. El sistema convierte a <strong>MAYÚSCULAS</strong> automáticamente.</li>
+                            <li>Asigna la mención y sección. Presiona <strong>"Guardar Estudiante"</strong>.</li>
+                            <li>Para inhabilitar: presiona el botón ámbar <strong>"Inhabilitar"</strong> y confirma. Para reactivar: <strong>"Habilitar"</strong>.</li>
+                            <li>Haz clic en el ícono de expediente para ver el historial con semáforo de riesgo (🟢 Regular / 🟡 En observación / 🔴 Reprobando).</li>
+                        </ol>
+
+                        <h4 style="color:#1e293b;font-size:0.88rem;margin:1rem 0 0.4rem;">5.5. Cronograma de Períodos y Cierre de Año Escolar</h4>
+                        <ol style="padding-left:1.4rem;margin:0.4rem 0 0.8rem;">
+                            <li>En <strong>"Gestión" → "Períodos"</strong>, haz clic en <strong>"+ Nuevo Período"</strong>. Define nombre y fechas límites de MP1, MP2 y MP3.</li>
+                            <li>Establece el período como <strong>"Activo"</strong> (solo uno activo a la vez).</li>
+                            <li>Al culminar el año: presiona el botón rojo <strong>"Finalizar Año Escolar"</strong> y confirma dos veces. Las calificaciones quedarán <strong>congeladas e inmutables</strong> y se habilitará la promoción de sección.</li>
+                        </ol>
+
+                        <!-- ── SECCIÓN 6 ── -->
+                        <h3 id="prof-guide-sec6" style="color:#4a151b;border-left:4px solid #4a151b;padding-left:0.6rem;font-size:0.95rem;margin:1.5rem 0 0.75rem;">6. Guía para el Superadministrador</h3>
+
+                        <h4 style="color:#1e293b;font-size:0.88rem;margin:1rem 0 0.4rem;">6.1. Panel Principal y Cuentas Administrativas</h4>
+                        <ol style="padding-left:1.4rem;margin:0.4rem 0 0.8rem;">
+                            <li>Monitorea el listado de administradores y solicitudes de cambio de contraseña.</li>
+                            <li>Haz clic en <strong>"+ Nuevo Administrador"</strong> e introduce las credenciales del directivo autorizado.</li>
+                        </ol>
+
+                        <h4 style="color:#1e293b;font-size:0.88rem;margin:1rem 0 0.4rem;">6.2. Auditoría Docente y Filtros de Matrícula</h4>
+                        <ul style="padding-left:1.4rem;margin:0.4rem 0 0.8rem;">
+                            <li><strong>Pestaña "Profesores":</strong> Inhabilita (botón ámbar), reactiva (botón verde) o cambia contraseña de emergencia (botón azul 🔑).</li>
+                            <li><strong>Pestaña "Estudiantes":</strong> Aplica filtros dinámicos por Mención y Sección. Usa <strong>"Sincronizar"</strong> para refrescar desde MySQL.</li>
+                        </ul>
+
+                        <h4 style="color:#1e293b;font-size:0.88rem;margin:1rem 0 0.4rem;">6.3. Consola de Mantenimiento MySQL ★ NUEVO</h4>
+                        <p>Ubicada en la pestaña <strong>"Base de Datos"</strong> del panel Superadmin:</p>
+                        <ol style="padding-left:1.4rem;margin:0.4rem 0 0.8rem;">
+                            <li><strong>Métricas Físicas:</strong> Motor MySQL, número de tablas (12), total de registros y tamaño en MB.</li>
+                            <li><strong>Crear Respaldo:</strong> Presiona <strong>"Crear Respaldo Ahora"</strong>. Se genera un volcado <code>.SQL</code> completo al instante.</li>
+                            <li><strong>Descargar:</strong> Haz clic en <strong>"Descargar"</strong> para guardar en pendrive o disco externo.</li>
+                            <li><strong>Optimizar e Indexar:</strong> Presiona <strong>"Optimizar e Indexar Tablas"</strong>. Ejecuta CHECK TABLE, crea índices de alto rendimiento y desfragmenta con OPTIMIZE TABLE.</li>
+                            <li><strong>Restaurar:</strong> Haz clic en <strong>"Restaurar"</strong> en el backup deseado y confirma en el modal de advertencia.</li>
+                        </ol>
+
+                        <!-- ── SECCIÓN 7 ── -->
+                        <h3 id="prof-guide-sec7" style="color:#4a151b;border-left:4px solid #4a151b;padding-left:0.6rem;font-size:0.95rem;margin:1.5rem 0 0.75rem;">7. Preguntas Frecuentes (FAQ)</h3>
+
+                        <div style="display:flex;flex-direction:column;gap:0.75rem;">
+                            <details style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:0.75rem;">
+                                <summary style="cursor:pointer;font-weight:600;color:#1e293b;">¿Por qué el Administrador no ve el botón "Evaluaciones"?</summary>
+                                <p style="margin:0.5rem 0 0;color:#475569;">La planificación y ponderación de actividades es una potestad pedagógica exclusiva del docente. Los administradores supervisan actas y sábanas finales consolidadas.</p>
+                            </details>
+                            <details style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:0.75rem;">
+                                <summary style="cursor:pointer;font-weight:600;color:#1e293b;">¿Cómo calcula el sistema la equivalencia en 20 puntos?</summary>
+                                <p style="margin:0.5rem 0 0;color:#475569;">Aplica: <code>(Porcentaje × 20) / 100</code>. Así, 20% = 4.0 pts, 35% = 7.0 pts, 50% = 10.0 pts sobre 20.</p>
+                            </details>
+                            <details style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:0.75rem;">
+                                <summary style="cursor:pointer;font-weight:600;color:#1e293b;">¿Por qué no se habilita "Guardar Configuración" en Evaluaciones?</summary>
+                                <p style="margin:0.5rem 0 0;color:#475569;">El sistema exige que la suma total sea exactamente 100% (20.0 pts / 20). Usa el botón <strong>"Distribuir Equitativamente"</strong> para repartir en partes iguales.</p>
+                            </details>
+                            <details style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:0.75rem;">
+                                <summary style="cursor:pointer;font-weight:600;color:#1e293b;">¿Qué sucede con las calificaciones al cerrar el año escolar?</summary>
+                                <p style="margin:0.5rem 0 0;color:#475569;">Al finalizar el año, el sistema congela las notas volviéndolas inmutables (solo lectura). Esto protege legalmente las calificaciones contra alteraciones posteriores.</p>
+                            </details>
+                            <details style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:0.75rem;">
+                                <summary style="cursor:pointer;font-weight:600;color:#1e293b;">Los nombres se guardan en MAYÚSCULAS, ¿es un error?</summary>
+                                <p style="margin:0.5rem 0 0;color:#475569;">No. Es un estándar institucional estricto para garantizar uniformidad en reportes ministeriales y títulos de bachiller técnico.</p>
+                            </details>
+                            <details style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:0.75rem;">
+                                <summary style="cursor:pointer;font-weight:600;color:#1e293b;">Un profesor olvidó su contraseña, ¿cómo se la restablezco?</summary>
+                                <p style="margin:0.5rem 0 0;color:#475569;">Desde la pestaña "Profesores" del panel Superadministrador, haz clic en el botón azul de llave <strong>"Cambiar Clave"</strong> y asígnale una nueva contraseña de acceso inmediato.</p>
+                            </details>
+                        </div>
+
+                        <!-- ── SECCIÓN 8 ── -->
+                        <h3 id="prof-guide-sec8" style="color:#4a151b;border-left:4px solid #4a151b;padding-left:0.6rem;font-size:0.95rem;margin:1.5rem 0 0.75rem;">8. Buenas Prácticas y Seguridad Institucional</h3>
+                        <ul style="padding-left:1.4rem;margin:0.4rem 0 1rem;">
+                            <li style="margin-bottom:0.4rem;">Cerrar sesión al levantarse del puesto usando el botón <strong>"Cerrar sesión"</strong> del menú lateral.</li>
+                            <li style="margin-bottom:0.4rem;">Generar respaldos <code>.SQL</code> <strong>semanales</strong> desde la consola Superadmin y guardarlos en almacenamiento externo.</li>
+                            <li style="margin-bottom:0.4rem;">Verificar que todas las secciones tengan Docente Guía asignado antes de iniciar el vaciado de calificaciones.</li>
+                            <li style="margin-bottom:0.4rem;">No compartir contraseñas de nivel Administrador ni Superadministrador bajo ninguna circunstancia.</li>
+                        </ul>
+
+                        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:0.75rem 1rem;font-size:0.8rem;color:#166534;">
+                            <i class='bx bx-shield-quarter'></i> <strong>Documento generado por el Departamento de Control de Estudios y Sistemas · E.T.R. "Alí Primera" · Versión 1.0 · Año Escolar 2026-2027</strong>
+                        </div>
+
+                    </div>
+                </div><!-- /tab-guide -->
+
+            </div><!-- /scroll area -->
+
+            <div class="modal-footer" style="background:#f8fafc;border-top:1px solid #e2e8f0;flex-shrink:0;">
+                <button class="btn-primary close-about-modal-btn" style="min-width:110px;">
+                    <i class='bx bx-check'></i> Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    /* ── Tabs del modal Acerca De / Guía ── */
+    (function(){
+        document.addEventListener('click', function(e){
+            var btn = e.target.closest('.about-tab-btn');
+            if(!btn) return;
+            var targetId = btn.dataset.tab;
+            // panels
+            document.querySelectorAll('.about-tab-panel').forEach(function(p){ p.style.display='none'; });
+            var targetPanel = document.getElementById(targetId);
+            if(targetPanel) targetPanel.style.display='block';
+            // buttons
+            document.querySelectorAll('.about-tab-btn').forEach(function(b){
+                b.style.color='#64748b';
+                b.style.borderBottom='3px solid transparent';
+                b.style.fontWeight='600';
+            });
+            btn.style.color='#4a151b';
+            btn.style.borderBottom='3px solid #4a151b';
+        });
+    })();
+    </script>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         MODAL: TÉRMINOS Y PRIVACIDAD
+         ═══════════════════════════════════════════════════════════ -->
+    <div id="terms-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-container" style="max-width:580px;width:95%;">
+            <div class="modal-header">
+                <h3><i class='bx bx-shield-quarter'></i> Términos de Uso y Privacidad</h3>
+                <button class="modal-close close-terms-modal-btn">&times;</button>
+            </div>
+            <div class="modal-body" style="padding:1.5rem;font-size:0.88rem;color:#475569;line-height:1.6;max-height:60vh;overflow-y:auto;">
+                <h4 style="color:#1e293b;margin:0 0 0.5rem 0;">1. Uso Institucional Exclusivo</h4>
+                <p style="margin-bottom:1rem;">
+                    Este sistema está destinado exclusivamente para uso del personal docente, directivo y administrativo debidamente autorizado por la E.T. "Alí Primera".
+                </p>
+                <h4 style="color:#1e293b;margin:0 0 0.5rem 0;">2. Confidencialidad de Calificaciones</h4>
+                <p style="margin-bottom:1rem;">
+                    Las notas, datos personales de estudiantes y registros pedagógicos constituyen información confidencial protegida por la normativa educativa vigente.
+                </p>
+                <h4 style="color:#1e293b;margin:0 0 0.5rem 0;">3. Responsabilidad del Usuario</h4>
+                <p style="margin-bottom:1rem;">
+                    Cada usuario es responsable del resguardo de sus credenciales de acceso y de la veracidad de las calificaciones y evaluaciones consignadas en el sistema.
+                </p>
+                <h4 style="color:#1e293b;margin:0 0 0.5rem 0;">4. Seguridad y Auditoría</h4>
+                <p style="margin:0;">
+                    El sistema registra marcas de tiempo y auditorías en las modificaciones de calificaciones y configuraciones de evaluación para garantizar la integridad institucional.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary close-terms-modal-btn">
+                    <i class='bx bx-check'></i> Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts globales (data.js y materias.js deben estar en ../lib/) -->
+    <script src="../lib/data.js?v=1.2.0"></script>
+    <script type="module">
+        import { showToast, showConfirm } from '../src/utils/domHelper.js';
+        window.showToast = showToast;
+        window.showConfirm = showConfirm;
+    </script>
+    <script src="../lib/materias.js"></script>
+    <script src="render-prof.js?v=1.0.5"></script>
+    <script src="nav-prof.js"></script>
+    <script src="../lib/boletin.js?v=1.0.0"></script>
+    <script src="../lib/reportes-docs.js?v=1.1.0"></script>
+    <script src="../lib/reportes-panel.js?v=1.2.0"></script>
+    <script src="grados-maestros-prof.js?v=1.1.0"></script>
+    <script src="../lib/section-modal.js?v=1.0.2"></script>
+    <script src="evaluaciones-manager.js?v=1.0.4"></script>
+
+
+
+    <!-- Cargar el profesor desde la sesión -->
+    <!-- Carga e Inicialización unificada -->
+    <script>
+        async function bootstrap() {
+            try {
+                // 1. Cargar datos desde la API (MySQL)
+                const dataLoaded = await initData();
+                if (!dataLoaded) {
+                    showToast('Error cargando datos del servidor', 'error');
+                    return;
+                }
+
+                // 2. Verificar Sesión
+                const currentUserData = sessionStorage.getItem('currentUser');
+                if (!currentUserData) {
+                    window.location.replace('../login/bienvenida.html');
+                    return;
+                }
+
+                const currentUser = JSON.parse(currentUserData);
+                
+                // 3. Verificar Rol
+                if (currentUser.rol !== 'teacher') {
+                    if (currentUser.rol === 'admin') {
+                        window.location.replace('../admin/index.html?alerta=acceso_denegado');
+                    } else if (currentUser.rol === 'superadmin') {
+                        window.location.replace('../superadmin/index.html?alerta=acceso_denegado');
+                    } else {
+                        sessionStorage.removeItem('currentUser');
+                        window.location.replace('../login/bienvenida.html');
+                    }
+                    return;
+                }
+
+                // 4. Identificar al Profesor en la lista global de usuarios
+                console.log("Buscando profesor en lista de usuarios (Total: " + users.length + ")...");
+                
+                const normalize = (val) => {
+                    if (!val) return '';
+                    return String(val).replace(/^[vVeE][-\s]?/, '').trim().toLowerCase();
+                };
+
+                const targetId = currentUser.id;
+                const targetCedula = normalize(currentUser.cedula);
+
+                // Intento 1: Por ID
+                let teacher = users.find(u => u.id == targetId);
+                
+                // Intento 2: Por Cédula Normalizada (Case Insensitive)
+                if (!teacher) {
+                    console.warn("No se encontró por ID, intentando por cédula normalizada:", targetCedula);
+                    teacher = users.find(u => {
+                        const uRol = String(u.rol || '').trim().toLowerCase();
+                        const uCed = normalize(u.cedula);
+                        return uRol === 'teacher' && uCed === targetCedula;
+                    });
+                }
+                
+                if (teacher) {
+                    const uRolFinal = String(teacher.rol || '').trim().toLowerCase();
+                    if (uRolFinal !== 'teacher') {
+                        console.error("Usuario encontrado pero no es profesor:", teacher.rol);
+                        showToast(`Error: Tu usuario tiene rol '${teacher.rol}', no 'teacher'`, 'error');
+                        // setTimeout(() => window.location.href = '../login/bienvenida.html', 2000);
+                        return;
+                    }
+
+                    console.log("Profesor identificado exitosamente:", teacher);
+                    
+                    // Asegurar que el profesor tenga la propiedad "secciones" como un arreglo de IDs, extrayéndolos de "asignaciones"
+                    let teacherSections = [];
+                    if (teacher.asignaciones) {
+                        try {
+                            const asigs = typeof teacher.asignaciones === 'string' ? JSON.parse(teacher.asignaciones) : teacher.asignaciones;
+                            // asigs es un arreglo de objetos: [{seccion_id: 1, ...}]
+                            teacherSections = [...new Set(asigs.map(a => parseInt(a.seccion_id)))].filter(id => !isNaN(id));
+                        } catch(e) { console.error("Error parseando asignaciones:", e); }
+                    }
+                    teacher.secciones = teacherSections;
+                    
+                    window.currentTeacher = teacher;
+                    const userNameDisplay = document.getElementById('user-name-display');
+                    const userRoleDisplay = document.getElementById('user-role-display');
+                    if (userNameDisplay) {
+                        userNameDisplay.textContent = `${teacher.nombre} ${teacher.apellido}`;
+                    }
+                    if (userRoleDisplay) {
+                        userRoleDisplay.textContent = "Profesor";
+                    }
+                } else {
+                    console.error("Cédula buscada:", targetCedula);
+                    const rolesEncontrados = [...new Set(users.map(u => String(u.rol).trim().toLowerCase()))];
+                    const msg = `Profesor no encontrado. Mi cédula: ${targetCedula}. En BD hay ${users.length} usuarios. Roles en BD: ${rolesEncontrados.join(', ')}`;
+                    
+                    // Crear un elemento de alerta permanente en el DOM para que no desaparezca
+                    const errorContainer = document.createElement('div');
+                    errorContainer.style = "position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #ff4444; color: white; padding: 20px; border-radius: 8px; z-index: 9999; box-shadow: 0 4px 15px rgba(0,0,0,0.3); text-align: center; max-width: 90%;";
+                    errorContainer.innerHTML = `
+                        <h2><i class='bx bx-error'></i> Error de Identificación</h2>
+                        <p>${msg}</p>
+                        <p style="margin-top: 10px; font-size: 0.8rem; opacity: 0.8;">Verifica que el usuario esté registrado en el panel de Admin con el rol "teacher".</p>
+                        <button onclick="window.location.href='../login/bienvenida.html'" style="margin-top: 15px; padding: 8px 20px; border: none; border-radius: 4px; cursor: pointer;">Volver al Inicio</button>
+                    `;
+                    document.body.appendChild(errorContainer);
+                    return;
+                }
+
+                // 5. Renderizar todo
+                if (typeof renderAll === 'function') {
+                    renderAll();
+                }
+                
+                // 6. Inicializar Gestor de Notas (si existe)
+                if (typeof window.initGradesManager === 'function') {
+                    await window.initGradesManager();
+                }
+
+            } catch (error) {
+                console.error("Error en bootstrap:", error);
+                showToast('Error crítico al iniciar el sistema', 'error');
+            }
+        }
+
+        // Iniciar
+        document.addEventListener('DOMContentLoaded', bootstrap);
+    </script>
+    <script>
+        /* ===== BÚSQUEDA EN TIEMPO REAL: ESTUDIANTES (PROFESOR) ===== */
+        let profStudentSearchQuery = '';
+
+        function onProfStudentSearch(val) {
+            profStudentSearchQuery = val.trim();
+            const clearBtn = document.getElementById('clear-prof-student-btn');
+            if (clearBtn) clearBtn.style.display = val ? 'flex' : 'none';
+            renderStudents();
+        }
+
+        function clearProfStudentSearch() {
+            const inp = document.getElementById('search-prof-student-input');
+            if (inp) inp.value = '';
+            profStudentSearchQuery = '';
+            const clearBtn = document.getElementById('clear-prof-student-btn');
+            if (clearBtn) clearBtn.style.display = 'none';
+            renderStudents();
+        }
+    </script>
+    <!-- Script del Footer y Modales Acerca de -->
+    <script src="../lib/footer.js?v=1.0.2"></script>
+    <script>
+        // Notificación si se redirigió por intento de acceso a URL restringida
+        window.addEventListener('load', () => {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('alerta') === 'acceso_denegado') {
+                if (typeof window.showToast === 'function') {
+                    window.showToast('Acceso denegado: No tienes permisos para ingresar a ese módulo con tu perfil actual.', 'error');
+                }
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        });
+    </script>
+</body>
+</html>
