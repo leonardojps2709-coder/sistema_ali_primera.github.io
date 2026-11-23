@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio de Sesión - Administrador</title>
+    <link rel="stylesheet" href="estilo login.css">
+    <link rel="stylesheet" href="../lib/boxicons/css/boxicons.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
+    <style>
+        /* ===== SUPERADMIN OVERLAY ===== */
+        .superadmin-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(3px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .superadmin-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* Card idéntica a .login-container */
+        .superadmin-card {
+            background-color: #ffffff;
+            width: 100%;
+            max-width: 400px;
+            padding: 2.5rem;
+            border-radius: 1.2rem;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            position: relative;
+            transform: translateY(24px);
+            transition: transform 0.3s ease;
+            margin: 1rem;
+        }
+        .superadmin-overlay.active .superadmin-card {
+            transform: translateY(0);
+        }
+
+        /* Header */
+        .sa-header {
+            text-align: center;
+            margin-bottom: 1.8rem;
+        }
+        .sa-brand {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            margin-bottom: 0.8rem;
+        }
+        .sa-brand img {
+            width: 50px;
+            height: auto;
+        }
+        .sa-brand-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #4a151b;
+            letter-spacing: 1px;
+        }
+        .sa-superadmin-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            background: #f4eaeb;
+            color: #4a151b;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            padding: 0.22rem 0.7rem;
+            border-radius: 12px;
+            border: 1px solid rgba(74,21,27,0.2);
+            margin-bottom: 0.75rem;
+        }
+        .sa-title {
+            font-size: 1.4rem;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+        .sa-subtitle {
+            font-size: 0.83rem;
+            color: #666;
+        }
+
+        /* Form — igual a .form-group / .form-label / .form-input del login */
+        .sa-form-group {
+            margin-bottom: 1.2rem;
+            position: relative;
+        }
+        .sa-label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 0.5rem;
+            padding-left: 0.2rem;
+        }
+        .sa-input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid #eee;
+            border-radius: 0.6rem;
+            outline: none;
+            font-size: 0.9rem;
+            font-family: 'Poppins', sans-serif;
+            color: #333;
+            background: #fff;
+            transition: all 0.3s ease;
+        }
+        .sa-input:focus {
+            border-color: #4a151b;
+            background-color: #f9f9f9;
+        }
+        .sa-input.is-error { border-color: #d32f2f; }
+
+        .sa-password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .sa-toggle-pw {
+            position: absolute;
+            right: 1.2rem;
+            cursor: pointer;
+            color: #888;
+            font-size: 1.3rem;
+            transition: color 0.3s;
+            user-select: none;
+        }
+        .sa-toggle-pw:hover { color: #4a151b; }
+
+        .sa-error {
+            color: #d32f2f;
+            font-size: 0.8rem;
+            margin-top: 0.3rem;
+            display: none;
+        }
+
+        /* Botón — igual a .login-button */
+        .sa-btn {
+            width: 100%;
+            padding: 0.9rem;
+            background-color: #4a151b;
+            color: white;
+            border: none;
+            border-radius: 0.6rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'Poppins', sans-serif;
+            margin-top: 0.25rem;
+        }
+        .sa-btn:hover {
+            background-color: #7e232e;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(74, 21, 27, 0.3);
+        }
+        .sa-btn:active { transform: translateY(0); }
+
+        /* Botón cerrar */
+        .sa-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: #f1f5f9;
+            border: none;
+            color: #64748b;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, color 0.2s;
+        }
+        .sa-close:hover { background: #f4eaeb; color: #4a151b; }
+
+        /* Click hint en logo */
+        .login-brand { cursor: pointer; user-select: none; }
+        .login-brand .logo { transition: transform 0.15s ease; }
+        .login-brand:active .logo { transform: scale(0.92); }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <div class="login-brand" id="login-brand-logo" title="">
+                <img src="../lib/recursos/logo ali.png" alt="ali" class="logo" id="brand-logo-img">
+                <span class="name">Ali Primera</span>
+            </div>
+            <h1 class="login-title">Iniciar Sesión</h1>
+            <p class="login-subtitle">Ingresa tus credenciales para acceder al sistema</p>
+        </div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username" class="form-label">Usuario</label>
+                <input type="text" id="username" class="form-input" placeholder="Ingresa tu usuario" required>
+                <div id="usernameError" class="error-message">Por favor ingresa un usuario válido</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="password" class="form-label">Contraseña</label>
+                <div class="password-field-container">
+                    <input type="password" id="password" class="form-input" placeholder="Ingresa tu contraseña" required>
+                    <i class='bx bx-hide toggle-password' id="togglePassword"></i>
+                </div>
+                <div id="passwordError" class="error-message">Por favor ingresa una contraseña válida</div>
+            </div>
+            
+            <div class="forgot-password">
+                <a href="#" id="forgotPasswordLink">¿Olvidaste tu contraseña?</a>
+            </div>
+            
+            <button type="submit" class="login-button">Iniciar Sesión</button>
+        </form>
+        <div class="login-footer">
+            <a href="bienvenida.html" class="back-link">
+                <i class='bx bx-left-arrow-alt'></i> Volver al menú principal
+            </a>
+        </div>
+    </div>
+
+    <!-- ===== MODAL RECUPERAR CONTRASEÑA ===== -->
+    <div class="superadmin-overlay" id="forgot-password-overlay">
+        <div class="superadmin-card">
+            <button class="sa-close" id="fp-close-btn" title="Cerrar">&times;</button>
+
+            <div class="sa-header">
+                <div class="sa-brand">
+                    <img src="../lib/recursos/logo ali.png" alt="Logo Ali Primera">
+                </div>
+                <h2 class="sa-title">Recuperar Contraseña</h2>
+                <p class="sa-subtitle" style="margin-top:0.4rem; line-height:1.4;">
+                    Ingresa tu cédula o correo. Se enviará una solicitud al Super Administrador para restablecer tu acceso.
+                </p>
+            </div>
+
+            <div class="sa-form-group">
+                <label class="sa-label">Cédula o Email</label>
+                <input type="text" id="fp-input" class="sa-input"
+                       placeholder="Ej: V-12345678 o correo@ejemplo.com" autocomplete="off">
+                <div class="sa-error" id="fp-error"></div>
+            </div>
+
+            <button class="sa-btn" id="fp-submit-btn">Enviar Solicitud</button>
+        </div>
+    </div>
+
+
+    <!-- ===== MODAL SUPERADMIN (mismo estilo que login normal) ===== -->
+    <div class="superadmin-overlay" id="superadmin-overlay">
+        <div class="superadmin-card">
+            <button class="sa-close" id="sa-close-btn" title="Cerrar">&times;</button>
+
+            <div class="sa-header">
+                <div class="sa-brand">
+                    <img src="../lib/recursos/logo ali.png" alt="Logo Ali Primera">
+                    <span class="sa-brand-name">Ali Primera</span>
+                </div>
+                <div class="sa-superadmin-tag">
+                    <i class='bx bx-crown'></i> Super Admin
+                </div>
+                <h2 class="sa-title">Iniciar Sesión</h2>
+                <p class="sa-subtitle">Panel de gestión de administradores</p>
+            </div>
+
+            <div class="sa-form-group">
+                <label class="sa-label">Usuario</label>
+                <input type="text" id="sa-username" class="sa-input"
+                       placeholder="Ingresa tu usuario" autocomplete="off">
+                <div class="sa-error" id="sa-username-error">Usuario no válido</div>
+            </div>
+
+            <div class="sa-form-group">
+                <label class="sa-label">Contraseña</label>
+                <div class="sa-password-wrapper">
+                    <input type="password" id="sa-password" class="sa-input"
+                           placeholder="Ingresa tu contraseña" style="padding-right:3rem;">
+                    <i class='bx bx-hide sa-toggle-pw' id="sa-toggle-pw"></i>
+                </div>
+                <div class="sa-error" id="sa-password-error">Contraseña incorrecta</div>
+            </div>
+
+            <button class="sa-btn" id="sa-login-btn">Ingresar</button>
+        </div>
+    </div>
+
+    <script type="module" src="../src/utils/domHelper.js"></script>
+    <script src="../lib/data.js?v=1.2.0"></script>
+    <script type="module">
+        import { showToast } from '../src/utils/domHelper.js';
+        window.showToast = showToast;
+    </script>
+    <script src="login.js" defer></script>
+</body>
+</html>

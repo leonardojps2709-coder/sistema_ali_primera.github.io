@@ -1,0 +1,694 @@
+/* lib/reportes.css
+   Estilos del panel de reportes (tarjetas) y de los documentos que se imprimen.
+   Convive con lib/boletin.css: los documentos usan una paleta y tipografía similares. */
+
+/* ============================================================
+   PANEL: tarjetas de acción
+   ============================================================ */
+
+.rep-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 0.85rem;
+    margin-bottom: 1.1rem;
+}
+
+.rep-card {
+    display: block;
+    text-align: left;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 1rem 1.1rem;
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.rep-card:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+    transform: translateY(-1px);
+}
+
+.rep-card.activa {
+    border-color: #4a151b;
+    box-shadow: 0 0 0 3px rgba(74, 21, 27, 0.08);
+}
+
+.rep-card i {
+    font-size: 1.5rem;
+    color: #4a151b;
+}
+
+.rep-card b {
+    display: block;
+    margin: 0.45rem 0 0.2rem;
+    font-size: 0.95rem;
+    color: #1e293b;
+}
+
+.rep-card span {
+    display: block;
+    font-size: 0.8rem;
+    line-height: 1.35;
+    color: #64748b;
+}
+
+/* Formulario que aparece bajo las tarjetas */
+.rep-form {
+    display: none;
+    grid-template-columns: minmax(170px, 210px) minmax(150px, 200px) minmax(150px, 200px) minmax(0, 1fr) auto;
+    gap: 0.85rem;
+    align-items: end;
+    background: #f8fafc;
+    border: 1px solid #eef2f7;
+    border-radius: 12px;
+    padding: 1.1rem;
+}
+
+/* En los reportes por sección no hay buscador: se quita su columna */
+.rep-form.sin-buscador {
+    grid-template-columns: minmax(170px, 210px) minmax(150px, 200px) minmax(150px, 200px) auto;
+}
+
+.rep-form.activo {
+    display: grid;
+}
+
+/* Los campos ocupan todo su espacio: antes se cortaban los textos largos */
+.rep-form select,
+.rep-form input[type="text"] {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    height: 44px;
+    border: 1px solid #dbe3ec;
+    border-radius: 10px;
+    background-color: #ffffff;
+    color: #1e293b;
+    font-family: inherit;
+    font-size: 0.9rem;
+    padding: 0 0.9rem;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.rep-form select:hover,
+.rep-form input[type="text"]:hover {
+    border-color: #cbd5e1;
+}
+
+.rep-form select:focus,
+.rep-form input[type="text"]:focus {
+    outline: none;
+    border-color: #4a151b;
+    box-shadow: 0 0 0 3px rgba(74, 21, 27, 0.10);
+}
+
+/* Flecha propia del desplegable, igual en todos los navegadores */
+.rep-form select {
+    -webkit-appearance: none;
+    appearance: none;
+    padding-right: 2.3rem;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.8rem center;
+    background-size: 12px;
+}
+
+/* Lupa dentro del buscador */
+.rep-form .rep-buscador input.filter-select {
+    padding-left: 2.5rem;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3ccircle cx='11' cy='11' r='7'%3e%3c/circle%3e%3cline x1='21' y1='21' x2='16.65' y2='16.65'%3e%3c/line%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: left 0.85rem center;
+    background-size: 15px;
+}
+
+/* Botón a juego con los campos */
+.rep-form .btn-primary {
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    border-radius: 10px;
+    padding: 0 1.2rem;
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow: 0 6px 16px rgba(74, 21, 27, 0.18);
+}
+
+.rep-form .rep-campo { min-width: 0; }
+
+.rep-form .rep-campo > label {
+    display: block;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #94a3b8;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+}
+
+.rep-buscador { position: relative; }
+
+.rep-lista {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    z-index: 40;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.14);
+    max-height: 280px;
+    overflow-y: auto;
+    display: none;
+}
+
+.rep-lista.visible { display: block; }
+
+.rep-lista-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.85rem;
+    color: #1e293b;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.rep-lista-item:last-child { border-bottom: none; }
+.rep-lista-item:hover,
+.rep-lista-item.activo { background: #f1f5f9; }
+
+.rep-lista-item .rep-lista-nombre { flex: 1; font-weight: 600; }
+.rep-lista-item .rep-lista-meta { color: #94a3b8; font-size: 0.76rem; white-space: nowrap; }
+
+.rep-lista-vacia {
+    padding: 0.7rem 0.85rem;
+    font-size: 0.82rem;
+    color: #94a3b8;
+}
+
+/* Estudiante seleccionado */
+.rep-seleccion {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    margin-top: 0.45rem;
+    padding: 0.4rem 0.65rem;
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    color: #065f46;
+}
+
+.rep-seleccion strong { font-weight: 700; }
+
+.rep-seleccion button {
+    border: none;
+    background: transparent;
+    color: #047857;
+    font-family: inherit;
+    font-size: 0.76rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
+}
+
+.rep-aviso {
+    margin-top: 0.9rem;
+    padding: 0.7rem 0.9rem;
+    border-radius: 9px;
+    font-size: 0.84rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.rep-aviso.info { background: #f0f9ff; border: 1px solid #bae6fd; color: #075985; }
+.rep-aviso.error { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; }
+
+/* Vista previa del documento antes de imprimir */
+.rep-preview { display: none; margin-top: 1.25rem; }
+.rep-preview.visible { display: block; }
+
+.rep-preview-barra {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.6rem;
+    flex-wrap: wrap;
+}
+
+.rep-preview-titulo {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #475569;
+}
+
+.rep-preview-titulo span { color: #94a3b8; font-weight: 500; }
+
+.rep-preview-acciones { display: flex; gap: 0.5rem; }
+
+.rep-preview-hoja {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    max-height: 72vh;
+    overflow: auto;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+/* Dentro de la vista previa el documento no necesita su propio marco */
+.rep-preview-hoja .doc-hoja,
+.rep-preview-hoja .boletin {
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    border-radius: 0;
+}
+
+/* Ocultar el botón de imprimir interno del boletín en la vista previa
+   (ya existe el botón «Imprimir» en la barra de la vista previa) */
+.rep-preview-hoja .boletin-acciones { display: none; }
+
+@media (max-width: 1100px) {
+    .rep-form,
+    .rep-form.sin-buscador { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 700px) {
+    .rep-form,
+    .rep-form.sin-buscador { grid-template-columns: 1fr; }
+}
+
+/* ============================================================
+   DOCUMENTOS
+   ============================================================ */
+
+.doc-hoja {
+    background: #ffffff;
+    color: #1e293b;
+    padding: 1.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 0.92rem;
+}
+
+.doc-cabecera {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    padding-bottom: 0.9rem;
+    border-bottom: 2px solid #4a151b;
+}
+
+.doc-titulo {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #4a151b;
+}
+
+.doc-subtitulo {
+    margin: 0.2rem 0 0;
+    font-size: 0.78rem;
+    color: #64748b;
+}
+
+.doc-periodo { text-align: right; line-height: 1.3; }
+
+.doc-periodo span {
+    display: block;
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #94a3b8;
+}
+
+.doc-periodo strong { font-size: 1rem; color: #1e293b; }
+
+.doc-datos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.75rem 1rem;
+    margin: 1rem 0;
+    padding: 0.85rem 1rem;
+    background: #f8fafc;
+    border: 1px solid #eef2f7;
+    border-radius: 10px;
+}
+
+.doc-dato span {
+    display: block;
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #94a3b8;
+    margin-bottom: 0.12rem;
+}
+
+.doc-dato strong { font-size: 0.9rem; color: #1e293b; }
+
+/* Tablas de los documentos */
+.doc-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.84rem;
+    margin-top: 0.5rem;
+}
+
+.doc-tabla thead th {
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: center;
+    padding: 0.55rem 0.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    white-space: nowrap;
+}
+
+.doc-tabla thead th:first-child { text-align: left; }
+
+.doc-tabla tbody td {
+    padding: 0.42rem 0.5rem;
+    text-align: center;
+    border-bottom: 1px solid #f1f5f9;
+    font-variant-numeric: tabular-nums;
+}
+
+.doc-tabla tbody tr:last-child td { border-bottom: none; }
+
+.doc-tabla .doc-materia {
+    text-align: left;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.doc-tabla .doc-final { font-weight: 700; }
+.doc-tabla .doc-nota.ok { color: #047857; font-weight: 700; }
+.doc-tabla .doc-nota.mal { color: #b91c1c; font-weight: 700; }
+.doc-vacio { color: #cbd5e1; }
+
+.doc-tabla tfoot td {
+    padding: 0.5rem;
+    text-align: center;
+    font-weight: 700;
+    background: #f8fafc;
+    border-top: 2px solid #e2e8f0;
+    color: #334155;
+}
+
+.doc-tabla tfoot td:first-child {
+    text-align: left;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+}
+
+.doc-chip {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.doc-chip.ok { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+.doc-chip.mal { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+.doc-chip.vacio { background: #f8fafc; color: #94a3b8; border: 1px dashed #e2e8f0; }
+
+/* Bloques por alumno (histórico de momentos) */
+.doc-alumno {
+    margin-top: 1.25rem;
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+.doc-alumno-cabecera {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem 0.75rem;
+    background: #f8fafc;
+    border: 1px solid #eef2f7;
+    border-left: 3px solid #4a151b;
+    border-radius: 8px;
+    margin-bottom: 0.4rem;
+}
+
+.doc-alumno-cabecera strong { display: block; font-size: 0.9rem; color: #1e293b; }
+.doc-alumno-cabecera small { color: #94a3b8; font-size: 0.74rem; }
+
+.doc-alumno-promedio { text-align: right; }
+
+.doc-alumno-promedio span {
+    display: block;
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #94a3b8;
+    font-weight: 700;
+}
+
+.doc-alumno-promedio b {
+    font-size: 1.05rem;
+    color: #1e293b;
+    font-variant-numeric: tabular-nums;
+}
+
+.doc-tabla-compacta { font-size: 0.78rem; margin-top: 0; }
+.doc-tabla-compacta thead th { font-size: 0.62rem; padding: 0.4rem; }
+.doc-tabla-compacta tbody td { padding: 0.3rem 0.4rem; }
+
+/* Sábana de la sección */
+.doc-sabana { font-size: 0.7rem; }
+.doc-sabana thead th { font-size: 0.6rem; padding: 0.45rem 0.25rem; }
+.doc-sabana tbody td { padding: 0.32rem 0.25rem; }
+.doc-sabana .doc-materia { white-space: nowrap; font-size: 0.72rem; }
+
+.doc-vacio-msg {
+    padding: 1.5rem;
+    text-align: center;
+    color: #94a3b8;
+    font-style: italic;
+    background: #f8fafc;
+    border: 1px dashed #e2e8f0;
+    border-radius: 9px;
+}
+
+.doc-pie {
+    margin-top: 1.25rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid #eef2f7;
+    text-align: center;
+    font-size: 0.7rem;
+    color: #94a3b8;
+}
+
+/* Boletín de evaluaciones */
+.doc-materia small {    display: block;
+    font-weight: 500;
+    font-size: 0.7rem;
+    color: #94a3b8;
+    margin-top: 0.1rem;
+}
+
+.doc-materia-def {
+    display: block;
+    font-size: 0.7rem;
+    color: #047857;
+    font-weight: 700;
+    margin-top: 0.15rem;
+}
+
+.doc-tabla-eval .doc-eval {
+    text-align: left;
+    padding: 0.2rem 0.6rem;
+}
+
+/* Cada evaluación en su propia línea, separadas por una línea horizontal */
+.doc-tabla-eval .eval-item {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    padding: 0.32rem 0;
+    border-bottom: 1px solid #eef2f7;
+    font-size: 0.78rem;
+    color: #334155;
+}
+
+.doc-tabla-eval .eval-item:last-child { border-bottom: none; }
+
+.doc-tabla-eval .eval-item b {
+    flex: 1;
+    min-width: 0;
+    font-weight: 600;
+    color: #475569;
+    font-size: 0.75rem;
+}
+
+.doc-tabla-eval .eval-item i {
+    color: #94a3b8;
+    font-style: normal;
+    font-size: 0.7rem;
+    white-space: nowrap;
+}
+
+.doc-tabla-eval .eval-item em {
+    min-width: 48px;
+    text-align: right;
+    font-style: normal;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+.doc-tabla-eval .eval-item em.ok { color: #047857; }
+.doc-tabla-eval .eval-item em.mal { color: #b91c1c; }
+.doc-tabla-eval .eval-item em.vacia { color: #cbd5e1; }
+
+/* Cuadrícula del boletín de evaluaciones: líneas verticales entre columnas */
+.doc-tabla-eval {
+    border: 1px solid #e2e8f0;
+    table-layout: fixed;
+    width: 100%;
+}
+
+/* Reparto de anchos: la materia no necesita tanto y las evaluaciones sí */
+.doc-tabla-eval thead th:nth-child(1) { width: 30%; }
+.doc-tabla-eval thead th:nth-child(2) { width: 14%; }
+.doc-tabla-eval thead th:nth-child(4) { width: 10%; }
+
+/* La materia se ancla arriba: antes quedaba centrada y dejaba un hueco grande */
+.doc-tabla-eval td.doc-materia {
+    vertical-align: top;
+    padding-top: 0.5rem;
+}
+
+.doc-tabla-eval thead th {
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.doc-tabla-eval thead th:not(:last-child),
+.doc-tabla-eval tbody td:not(:last-child) {
+    border-right: 1px solid #e2e8f0;
+}
+
+.doc-tabla-eval tbody td {
+    border-bottom: 1px solid #eef2f7;
+    overflow-wrap: break-word;
+}
+
+.doc-tabla-eval tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Tabla con cuadrícula reutilizable (evaluaciones de la sección) */
+.doc-tabla-cuadricula {
+    border: 1px solid #e2e8f0;
+}
+
+.doc-tabla-cuadricula thead th,
+.doc-tabla-cuadricula tbody td {
+    border-right: 1px solid #e2e8f0;
+    border-bottom: 1px solid #eef2f7;
+}
+
+.doc-tabla-cuadricula thead th:last-child,
+.doc-tabla-cuadricula tbody td:last-child {
+    border-right: none;
+}
+
+.doc-tabla-cuadricula tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Bloques: una tabla por materia y momento */
+.doc-bloque-eval {
+    margin-top: 1.15rem;
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+.doc-bloque-titulo {
+    margin: 0 0 0.4rem;
+    font-size: 0.86rem;
+    color: #4a151b;
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.doc-bloque-titulo span {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #94a3b8;
+    font-weight: 700;
+}
+
+.doc-tabla-eval-sec thead th small {
+    display: block;
+    font-size: 0.6rem;
+    color: #94a3b8;
+    font-weight: 600;
+    margin-top: 0.1rem;
+}
+
+.doc-tabla-eval-sec tbody td.doc-materia { white-space: nowrap; }
+
+.doc-eval-vacia { color: #94a3b8; font-style: italic; font-size: 0.76rem; }
+
+/* ============================================================
+   IMPRESIÓN
+   ============================================================ */
+
+@media print {
+    .doc-hoja {
+        border: none;
+        border-radius: 0;
+        padding: 0;
+        box-shadow: none;
+    }
+
+    .doc-alumno {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    .doc-tabla thead th {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        background: #f1f5f9 !important;
+        color: #475569 !important;
+    }
+
+    .doc-chip {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}

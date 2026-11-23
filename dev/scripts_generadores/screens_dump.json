@@ -1,0 +1,362 @@
+[
+  {
+    "index": 1,
+    "title": "1.1. Portal de Bienvenida y Selección de Rol",
+    "perfil": "Acceso Público / Todos los Usuarios",
+    "ruta": "http://localhost/Proyecto/login/bienvenida.html",
+    "proposito": "Punto de bienvenida institucional donde el usuario escoge su ámbito operativo (Docente o Personal Directivo/Administrador).",
+    "componentes": "Logotipo oficial, título del plantel, botón de acceso 'PROFESOR' y botón 'ADMINISTRADOR', redirección dinámica por roles.",
+    "caption": "",
+    "actions": "Seleccionar el tipo de perfil para ser redirigido a la pantalla de autenticación correspondiente."
+  },
+  {
+    "index": 2,
+    "title": "1.2. Pantalla de Inicio de Sesión Administrativo",
+    "perfil": "Administradores y Superadministrador",
+    "ruta": "http://localhost/Proyecto/login/login.html",
+    "proposito": "Autenticación segura para el personal directivo y de control de estudios mediante usuario y contraseña.",
+    "componentes": "Campos de Usuario y Contraseña, botón para mostrar/ocultar clave, enlace '¿Olvidaste tu contraseña?' y botón de inicio de sesión.",
+    "caption": "",
+    "actions": "Ingreso de credenciales, validación contra la base de datos MySQL, inicio de sesión y almacenamiento seguro en sessionStorage."
+  },
+  {
+    "index": 3,
+    "title": "1.3. Modal de Solicitud de Restablecimiento de Contraseña",
+    "perfil": "Personal Administrativo y Docente con credenciales extraviadas",
+    "ruta": "Enlace '¿Olvidaste tu contraseña?' en formulario de login",
+    "proposito": "Canal institucional para notificar al Superadministrador sobre la necesidad de reinicio de credencial de acceso.",
+    "componentes": "Campo de Cédula o Email institucional, validación en tiempo real y confirmación visual de solicitud enviada.",
+    "caption": "",
+    "actions": "Envía una notificación y bandera a la tabla de usuarios (solicitud_reset = 1) para que el Superadministrador restablezca la clave."
+  },
+  {
+    "index": 4,
+    "title": "1.4. Pantalla de Inicio de Sesión de Profesores",
+    "perfil": "Docentes / Profesores de la Institución",
+    "ruta": "http://localhost/Proyecto/login/login-maestros.html",
+    "proposito": "Acceso exclusivo para el personal docente utilizando su cédula de identidad y contraseña asignada.",
+    "componentes": "Campo de Cédula (V/E), campo de Contraseña con alternador de visibilidad, enlace de recuperación asistida y botón de acceso.",
+    "caption": "",
+    "actions": "Verificación de estatus activo como profesor, carga de la carga académica asignada y redirección inmediata al panel docente."
+  },
+  {
+    "index": 5,
+    "title": "2.1. Panel Principal de Superadministración",
+    "perfil": "Super Administrador (Credencial Root Institucional)",
+    "ruta": "http://localhost/Proyecto/superadmin/index.html",
+    "proposito": "Monitoreo integral de cuentas del sistema y bandeja de gestión de solicitudes de reseteo de contraseñas de Administradores y Profesores.",
+    "componentes": "Buscador de administradores, botón '+ Nuevo Administrador', bandeja de solicitudes de reseteo con pestañas 'Administradores' y 'Profesores', y listado de administradores con acciones de cambio de clave.",
+    "caption": "",
+    "actions": "Buscar administradores, registrar nuevos administradores, cambiar contraseñas de emergencia y atender solicitudes de reseteo de profesores y administradores."
+  },
+  {
+    "index": 6,
+    "title": "2.2. Modal de Registro de Nuevo Administrador",
+    "perfil": "Super Administrador",
+    "ruta": "Botón '+ Nuevo Administrador' en panel de superadministración",
+    "proposito": "Formulario para conceder credenciales y acceso de nivel Administrador al personal autorizado de control de estudios.",
+    "componentes": "Campos de Cédula, Nombres, Apellidos, Teléfono, Email, Contraseña inicial y confirmación de privilegios.",
+    "caption": "",
+    "actions": "Validar unicidad de cédula y formato de datos, inserción en la tabla de usuarios con rol 'admin' y actualización inmediata del listado."
+  },
+  {
+    "index": 7,
+    "title": "2.3. Control y Acciones Unificadas del Personal Docente",
+    "perfil": "Super Administrador",
+    "ruta": "Menú lateral → Pestaña 'Profesores'",
+    "proposito": "Auditoría global del cuerpo docente, control de acceso mediante inhabilitación o reactivación inmediata de cuentas, y reseteo directo de credenciales de seguridad.",
+    "componentes": "Buscador en vivo, insignias de estado (Activo/Inhabilitado) y tipo de docente (Docente, Solo Guía, Docente y Guía), botones unificados de acción: Bloqueo de Acceso (ámbar), Habilitación (verde), Cambio Directo de Clave (azul) y Eliminación Permanente (rojo).",
+    "caption": "Nómina de Profesores con Acciones Unificadas de Estado, Contraseña y Eliminación",
+    "actions": "Inhabilitar docentes temporalmente para impedir su ingreso a la plataforma, restablecer contraseñas de emergencia y eliminar docentes permanentemente del sistema con confirmación."
+  },
+  {
+    "index": 8,
+    "title": "2.4. Control, Búsqueda y Filtros de Estudiantes",
+    "perfil": "Super Administrador",
+    "ruta": "Menú lateral → Pestaña 'Estudiantes'",
+    "proposito": "Supervisión de la matrícula escolar clasificada por especialidades técnicas y secciones, sincronizada en tiempo real con las promociones académicas y cambios de curso.",
+    "componentes": "Barra de filtros avanzados con selector de Mención y Sección dinámico, buscador por nombre o cédula, contador de matrícula ('Mostrando X de Y estudiantes'), botón de sincronización forzada en vivo y tabla de estudiantes con badges de mención y sección.",
+    "caption": "Padrón de Estudiantes con Filtros de Mención, Sección y Sincronización en Vivo",
+    "actions": "Filtrar la nómina institucional por especialidad técnica, seleccionar secciones específicas, buscar estudiantes en tiempo real, sincronizar datos con un clic y eliminar expedientes con diálogo modal protegido."
+  },
+  {
+    "index": 9,
+    "title": "2.5. Panel de Mantenimiento y Base de Datos (Métricas y Respaldos SQL)",
+    "perfil": "Super Administrador (Acceso Root / Exclusivo)",
+    "ruta": "Menú lateral → Pestaña 'Base de Datos'",
+    "proposito": "Monitoreo del estado físico del almacenamiento en MySQL/MariaDB, creación de copias de seguridad completas (.sql) y gestión del histórico de respaldos del plantel.",
+    "componentes": "Tarjetas métricas superiores con bordes temáticos (Nombre y versión de motor MySQL, conteo de tablas y registros, tamaño físico en MB de datos e índices, total de copias almacenadas), botones 'Crear Respaldo Ahora' y 'Optimizar e Indexar Tablas', y tabla de respaldos con tamaño, fecha y botones de acción rápida.",
+    "caption": "Consola de Mantenimiento de Base de Datos, Métricas de Almacenamiento y Respaldos SQL",
+    "actions": "Generar respaldos .sql al instante mediante mysqldump institucional, descargar archivos de volcado a la computadora local, restaurar copias previas y eliminar respaldos obsoletos."
+  },
+  {
+    "index": 10,
+    "title": "2.6. Diagnóstico en Vivo, Reindexado y Desfragmentación InnoDB",
+    "perfil": "Super Administrador",
+    "ruta": "Pestaña 'Base de Datos' → Botón 'Optimizar e Indexar Tablas'",
+    "proposito": "Mantenimiento preventivo y correctivo del motor de base de datos, desfragmentación de espacio en disco, actualización de estadísticas para el optimizador de consultas y verificación de integridad estructural.",
+    "componentes": "Botón de ejecución con indicador giratorio, distintivo de última optimización completada con fecha y hora, y tabla de diagnóstico detallada con las 12 tablas del sistema (Motor, Número de filas, Tamaño de datos, Tamaño de índices, Chequeo de integridad CHECK TABLE y estado de desfragmentación OPTIMIZE/ANALYZE).",
+    "caption": "Diagnóstico de Integridad, Desfragmentación Física y Reindexado de Tablas InnoDB",
+    "actions": "Crear automáticamente índices de alto rendimiento faltantes (idx_usuarios_email, idx_usuarios_rol, idx_estudiantes_ap_nom, idx_secciones_guia), desfragmentar tablas InnoDB y asegurar la máxima velocidad en generación de reportes y boletines."
+  },
+  {
+    "index": 11,
+    "title": "2.7. Modal de Confirmación y Advertencia de Restauración de Base de Datos",
+    "perfil": "Super Administrador",
+    "ruta": "Pestaña 'Base de Datos' → Botón 'Restaurar' en cualquier archivo del listado",
+    "proposito": "Mecanismo de seguridad de doble confirmación con advertencia de impacto antes de sobrescribir la base de datos institucional con una copia previa.",
+    "componentes": "Icono de advertencia en rojo, visualización del nombre exacto del archivo SQL seleccionado, texto de advertencia sobre reemplazo de datos y botones 'Cancelar' y 'Sí, Restaurar Ahora'.",
+    "caption": "Modal de Confirmación con Advertencia de Seguridad para la Restauración de Base de Datos",
+    "actions": "Confirmar la restauración completa de la base de datos mediante el cliente mysql con parámetros institucionales seguros o abortar la operación sin afectar los datos activos."
+  },
+  {
+    "index": 12,
+    "title": "3.1. Dashboard Principal del Administrador",
+    "perfil": "Administrador (Control de Estudios)",
+    "ruta": "admin/index.html -> Menú 'Inicio'",
+    "proposito": "Centro de mando institucional con métricas globales, accesos directos y estado operativo del año escolar activo.",
+    "componentes": "Tarjetas resumen de matrícula, docentes activos, secciones habilitadas, asignaturas registradas y banners de bienvenida.",
+    "caption": "",
+    "actions": "Navegación general por el sistema y visualización rápida del volumen de información escolar."
+  },
+  {
+    "index": 13,
+    "title": "3.2. Directorio General de Usuarios",
+    "perfil": "Administrador",
+    "ruta": "admin/index.html -> Usuarios -> Ver Todos",
+    "proposito": "Padrón general consolidado de cuentas registradas en la plataforma con filtros por rol y búsqueda en tiempo real.",
+    "componentes": "Buscador instantáneo, pestañas de filtrado (Todos, Profesores, Administradores), botón '+ Nuevo Usuario' y tabla con datos de contacto y estado.",
+    "caption": "",
+    "actions": "Búsqueda interactiva de usuarios por cédula o nombre, filtrado rápido y apertura de modales de creación."
+  },
+  {
+    "index": 14,
+    "title": "3.3. Gestión del Cuerpo Docente",
+    "perfil": "Administrador",
+    "ruta": "admin/index.html -> Usuarios -> Profesores",
+    "proposito": "Administración integral de la plantilla de profesores, sus cargas horarias y asignaturas por sección.",
+    "componentes": "Listado de profesores con badges de asignaciones, botón '+ Nuevo Profesor' y opciones de edición y eliminación.",
+    "caption": "",
+    "actions": "Alta y modificación de profesores, configuración de contraseña y asignación de materias y secciones específicas a cada docente."
+  },
+  {
+    "index": 15,
+    "title": "3.4. Gestión de Cuentas Administrativas",
+    "perfil": "Administrador",
+    "ruta": "admin/index.html -> Usuarios -> Administradores",
+    "proposito": "Consulta del personal con privilegios administrativos para labores de control de estudios y secretaría.",
+    "componentes": "Tabla de administradores con datos de contacto, rol y opciones de mantenimiento de perfil.",
+    "caption": "",
+    "actions": "Control interno de usuarios administrativos del plantel."
+  },
+  {
+    "index": 16,
+    "title": "3.5. Estructura de Secciones y Años Escolares",
+    "perfil": "Administrador",
+    "ruta": "admin/index.html -> Académico -> Secciones y Años",
+    "proposito": "Organización de las aulas de clase de 1ro a 6to año por mención técnica con indicación de cupos y profesor guía.",
+    "componentes": "Botón '+ Nueva Sección', listado con mención, año, profesor guía asignado, conteo de estudiantes y botones de detalle/edición/eliminación.",
+    "caption": "",
+    "actions": "Creación de secciones (evitando duplicidad año/letra/mención), consulta de detalle y asignación de docentes guía."
+  },
+  {
+    "index": 17,
+    "title": "3.6. Padrón General de Estudiantes (Formato en Mayúsculas)",
+    "perfil": "Administrador",
+    "ruta": "admin/index.html -> Académico -> Estudiantes",
+    "proposito": "Matrícula escolar oficial con nombres y apellidos estandarizados en MAYÚSCULAS para actas ministeriales.",
+    "componentes": "Buscador en tiempo real por cédula o nombre, filtros por mención y sección, botón '+ Nuevo Estudiante' y tabla con acciones de expediente, edición y retiro.",
+    "caption": "",
+    "actions": "Inscripción de estudiantes, modificación de datos de contacto, cambio de sección y apertura del expediente académico individual."
+  },
+  {
+    "index": 18,
+    "title": "3.7. Panel Administrativo de Registro de Notas",
+    "perfil": "Administrador",
+    "ruta": "admin/index.html -> Académico -> Registrar Notas",
+    "proposito": "Supervisión y vaciado general de calificaciones oficiales por período, sección y asignatura.",
+    "componentes": "Selectores de Período, Mención, Sección y Asignatura, botón 'Cargar Estudiantes', tabla con columnas M.P.1, Inas, M.P.2, Inas, M.P.3, Inas, Definitiva y botón de guardado.",
+    "caption": "",
+    "actions": "Vaciado masivo de notas, verificación de rangos (0-20), cálculo automático de definitivas y guardado seguro en MySQL."
+  },
+  {
+    "index": 19,
+    "title": "3.8. Emisión de Reportes y Boletines de Calificaciones",
+    "perfil": "Administrador",
+    "ruta": "admin/index.html -> Académico -> Reporte de Notas",
+    "proposito": "Búsqueda y emisión de sábanas de notas, historiales académicos y boletines oficiales por estudiante.",
+    "componentes": "Selector de prefijo (V/E/RIF) y campo de búsqueda de cédula, botón 'Buscar' y contenedor de reportes imprimibles.",
+    "caption": "",
+    "actions": "Consulta de sábanas integrales de evaluación, consolidación de notas por lapso y descarga/impresión de boletines para representantes."
+  },
+  {
+    "index": 20,
+    "title": "3.9. Catálogo de Menciones Técnicas Institucionales",
+    "perfil": "Administrador",
+    "ruta": "admin/index.html -> Gestión -> Menciones",
+    "proposito": "Configuración de las especialidades técnicas de la escuela (Electricidad, Mecánica, Química, etc.) con sus códigos y colores.",
+    "componentes": "Tarjetas de mención con paleta de color personalizada, icono representativo, conteo de secciones asociadas y botones de edición.",
+    "caption": "",
+    "actions": "Alta, edición y visualización de especialidades técnicas, con bloqueo de eliminación si existen secciones vinculadas."
+  },
+  {
+    "index": 21,
+    "title": "3.10. Malla Curricular y Asignaturas",
+    "perfil": "Administrador",
+    "ruta": "admin/index.html -> Gestión -> Asignaturas",
+    "proposito": "Pensum académico estructurado por mención y año formativo (1ro a 6to año) con áreas curriculares.",
+    "componentes": "Filtro por mención, botón '+ Nueva Asignatura', listado agrupado por año con área pedagógica y acciones de edición y eliminación.",
+    "caption": "",
+    "actions": "Incorporación de materias al pensum de estudio y asignación a los diferentes años formativos."
+  },
+  {
+    "index": 22,
+    "title": "3.11. Gestión de Períodos Académicos y Cierre de Año",
+    "perfil": "Administrador",
+    "ruta": "admin/index.html -> Gestión -> Períodos",
+    "proposito": "Control de ciclos escolares, fechas límite por momento pedagógico y herramientas de cierre definitivo y promoción.",
+    "componentes": "Listado de períodos con estado (activo/cerrado), fechas de MP1/MP2/MP3, botón '+ Nuevo Período', botón 'Finalizar Año Escolar' y botón de 'Promover Secciones'.",
+    "caption": "",
+    "actions": "Apertura de nuevos períodos escolares, congelamiento de notas al cerrar año lectivo y promoción masiva de estudiantes al siguiente nivel."
+  },
+  {
+    "index": 23,
+    "title": "3.12. Modal de Registro y Edición de Sección",
+    "perfil": "Administrador",
+    "ruta": "Botón '+ Nueva Sección' en vista de Secciones",
+    "proposito": "Formulario de alta o modificación de secciones escolares.",
+    "componentes": "Campo de Nombre de Sección (ej. 1ro Año A), selector de Mención técnica, selector de Profesor Guía asignado y botones Guardar/Cancelar.",
+    "caption": "",
+    "actions": "Validación de unicidad en tiempo real y asignación formal de la jefatura de sección."
+  },
+  {
+    "index": 24,
+    "title": "3.13. Modal de Registro de Docente con Contraseña y Carga Académica",
+    "perfil": "Administrador",
+    "ruta": "Botón '+ Nuevo Profesor' en Gestión de Profesores",
+    "proposito": "Registro completo del docente: datos personales, contraseña inicial y carga académica (Materia a la izquierda, Sección a la derecha).",
+    "componentes": "Pestañas 'Datos Básicos' (con campo de Contraseña) y 'Materias y Secciones' con distribución Materia (izq) y Sección (der), botón '+ Añadir' y tabla de asignaciones.",
+    "caption": "",
+    "actions": "Registro del docente en la tabla de usuarios con su clave y guardado sincronizado de asignaciones en teacher_assignments."
+  },
+  {
+    "index": 25,
+    "title": "3.14. Modal de Inscripción y Edición de Estudiante (Mayúsculas)",
+    "perfil": "Administrador",
+    "ruta": "Botón '+ Nuevo Estudiante' en Padrón de Estudiantes",
+    "proposito": "Formulario de inscripción de estudiantes con forzado automático a MAYÚSCULAS en nombres y apellidos.",
+    "componentes": "Prefijo y número de Cédula, Nombres (en mayúsculas), Apellidos (en mayúsculas), Correo, Teléfono y selector de Sección.",
+    "caption": "",
+    "actions": "Validación de formato de cédula, verificación de no duplicidad e inscripción inmediata en la sección seleccionada."
+  },
+  {
+    "index": 26,
+    "title": "3.15. Modal de Vista Detallada de Sección",
+    "perfil": "Administrador",
+    "ruta": "Icono de ojo/detalle en tabla de Secciones",
+    "proposito": "Ficha técnica del aula con nómina completa de estudiantes inscritos y plantilla de profesores por materia.",
+    "componentes": "Encabezado con nombre de sección y mención, panel de estudiantes con botón rápido 'Inscribir' y panel de profesores con profesor guía destacado.",
+    "caption": "",
+    "actions": "Auditoría rápida del salón de clases, control de cupos y verificación de la cobertura docente del aula."
+  },
+  {
+    "index": 27,
+    "title": "3.16. Modal de Expediente y Perfil Integral del Estudiante",
+    "perfil": "Administrador",
+    "ruta": "Icono de expediente en la tabla de Estudiantes",
+    "proposito": "Historial académico completo del estudiante con cálculo de rendimiento y materias cursadas.",
+    "componentes": "Sidebar con foto/avatar y datos de contacto, tarjeta de nivel de riesgo académico, estadísticas (promedio, materias aprobadas/reprobadas) y tabla histórica de notas por momento.",
+    "caption": "",
+    "actions": "Diagnóstico pedagógico individual, detección temprana de reprobación o deserción y consulta integral de notas."
+  },
+  {
+    "index": 28,
+    "title": "4.1. Panel de Inicio del Docente",
+    "perfil": "Profesor / Docente",
+    "ruta": "profesor/index.html -> Inicio",
+    "proposito": "Pantalla de bienvenida para el docente con resumen de sus materias asignadas y accesos directos al vaciado de notas y evaluaciones.",
+    "componentes": "Nombre del profesor en sesión, tarjetas de acceso rápido (Mis Secciones, Estudiantes, Calificaciones, Evaluaciones) e información del año escolar.",
+    "caption": "",
+    "actions": "Acceso inmediato a la planilla de evaluación y visualización de alertas sobre los lapsos pedagógicos abiertos."
+  },
+  {
+    "index": 29,
+    "title": "4.2. Mis Secciones Asignadas",
+    "perfil": "Profesor",
+    "ruta": "profesor/index.html -> Menú 'Mis Secciones'",
+    "proposito": "Visualización exclusiva de los grupos y cursos donde el profesor imparte clase según su carga horaria.",
+    "componentes": "Tarjetas de secciones con nombre, mención, número de estudiantes y botón para abrir la vista detallada.",
+    "caption": "",
+    "actions": "Selección de grupo para acceder directamente a la nómina de estudiantes o a la planilla de notas."
+  },
+  {
+    "index": 30,
+    "title": "4.3. Nómina de Estudiantes del Docente",
+    "perfil": "Profesor",
+    "ruta": "profesor/index.html -> Menú 'Estudiantes'",
+    "proposito": "Directorio de estudiantes inscritos en las secciones donde el profesor tiene asignación docente.",
+    "componentes": "Buscador de estudiantes, filtros por sección y mención, tabla con cédula, nombres (en mayúsculas), email y acciones de consulta.",
+    "caption": "",
+    "actions": "Consulta de la lista oficial de alumnos para pase de lista y seguimiento individual."
+  },
+  {
+    "index": 31,
+    "title": "4.4. Vaciado de Calificaciones e Inasistencias con Calculadora de Evaluaciones",
+    "perfil": "Profesor",
+    "ruta": "profesor/index.html -> Menú 'Calificaciones'",
+    "proposito": "Planilla oficial de vaciado de notas por momentos con botones de calculadora interactiva en los encabezados M.P.1, M.P.2 y M.P.3.",
+    "componentes": "Selectores de Período, Mención, Sección y Asignatura, botón 'Cargar Estudiantes', encabezados con botones de calculadora (<i class='bx bx-calculator'></i>), inputs de notas (0-20), inasistencias, definitiva calculada y botón 'Guardar Calificaciones'.",
+    "caption": "",
+    "actions": "Ingreso manual o automático (desde evaluaciones) de calificaciones por momento, validación de rango numérico (0-20), cálculo de definitivas y sincronización con el servidor."
+  },
+  {
+    "index": 32,
+    "title": "4.5. Reportes de Rendimiento y Boletines Docentes",
+    "perfil": "Profesor",
+    "ruta": "profesor/index.html -> Menú 'Reporte de Notas'",
+    "proposito": "Módulo de consulta de boletines individuales de notas por cédula para revisión docente.",
+    "componentes": "Selector de cédula, campo de búsqueda, botón 'Buscar' y vista previa del boletín de calificaciones con notas por momento.",
+    "caption": "",
+    "actions": "Revisión final de notas antes del cierre de lapso e impresión de planillas de evaluación continua para la coordinación académica."
+  },
+  {
+    "index": 33,
+    "title": "4.6. Catálogo Institucional de Menciones",
+    "perfil": "Profesor",
+    "ruta": "profesor/index.html -> Menú 'Menciones'",
+    "proposito": "Consulta informativa de las especialidades técnicas del plantel para orientación docente.",
+    "componentes": "Tarjetas informativas de cada mención con sus colores e iconos distintivos.",
+    "caption": "",
+    "actions": "Consulta de las áreas curriculares y articulación interdisciplinaria de la escuela técnica."
+  },
+  {
+    "index": 34,
+    "title": "4.7. NUEVO: Módulo de Planificación de Evaluaciones (Exclusivo Docentes)",
+    "perfil": "Profesor (Opción exclusiva; retirada del panel de Administradores)",
+    "ruta": "profesor/index.html -> Menú 'Evaluaciones'",
+    "proposito": "Panel central para que el docente planifique las actividades evaluativas de sus asignaturas con ponderación exacta al 100% y escala sobre 20 pts.",
+    "componentes": "Barra de configuración con selectores de Sección, Materia y Período, botón '+ Configurar Evaluaciones', tabla de planes guardados con badges de estado MP1/MP2/MP3, botón 'Llenar Notas' (<i class='bx bx-calculator'></i>) y botón 'Editar'.",
+    "caption": "",
+    "actions": "Crear nuevos planes de evaluación por momento, consultar planes registrados, abrir el modal de calificación y editar ponderaciones."
+  },
+  {
+    "index": 35,
+    "title": "4.8. NUEVO: Modal de Configuración de Evaluaciones 100% y Escala sobre 20 Puntos",
+    "perfil": "Profesor",
+    "ruta": "Botón '+ Configurar' o icono de edición en la tabla de Evaluaciones",
+    "proposito": "Configurador interactivo de 1 a 7 evaluaciones por momento pedagógico. Calcula automáticamente la equivalencia en puntos sobre 20 (ej. 25% = 5.0 pts / 20).",
+    "componentes": "Pestañas de Momentos (1er, 2do y 3er Momento), control de número de evaluaciones (1-7), inputs de nombre y porcentaje con badge de puntos equivalente sobre 20, barra de total en vivo (ej. '100% (20.0 / 20 pts)'), botón 'Distribuir equitativamente' y botón 'Guardar Configuración'.",
+    "caption": "",
+    "actions": "Ajustar la cantidad de evaluaciones, asignar nombres y porcentajes asegurando la suma exacta de 100% (20 pts), y guardar la planificación en evaluaciones_config."
+  },
+  {
+    "index": 36,
+    "title": "4.9. NUEVO: Modal de Calificación Detallada de Evaluaciones y Vaciado Automático",
+    "perfil": "Profesor",
+    "ruta": "Botón de calculadora en tabla de Evaluaciones o cabeceras M.P.1/M.P.2/M.P.3 en Calificaciones",
+    "proposito": "Registro de notas detalladas por cada evaluación individual (escala 0 a 20 pts). Calcula en tiempo real la nota ponderada del momento y la transfiere directamente al vaciado oficial de notas.",
+    "componentes": "Pestañas de momento pedagógico, barra informativa con porcentajes y puntos asignados, tabla compacta con inputs de notas por evaluación (0-20), columna de Nota Momento con badges de aprobación (verde/rojo) y botón 'Guardar y Aplicar a Vaciado de Notas'.",
+    "caption": "",
+    "actions": "Ingresar calificaciones por evaluación para cada estudiante, visualizar en vivo la nota acumulada sobre 20 pts y aplicar automáticamente los resultados a la columna correspondiente (MP1, MP2 o MP3) de la tabla notas."
+  }
+]

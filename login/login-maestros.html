@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso Profesores - Ali Primera</title>
+    <link rel="stylesheet" href="estilo login maestros.css">
+    <link rel="stylesheet" href="../lib/boxicons/css/boxicons.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
+    <style>
+        .pw-wrapper { position: relative; }
+        .pw-wrapper .form-input { padding-right: 2.5rem; }
+        .pw-toggle { position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); cursor: pointer; color: #94a3b8; font-size: 1.15rem; background: none; border: none; padding: 0; display: flex; align-items: center; }
+        .forgot-link { display: block; text-align: right; margin-top: 0.4rem; font-size: 0.8rem; color: #7e232e; cursor: pointer; text-decoration: none; }
+        .forgot-link:hover { text-decoration: underline; }
+
+        /* Modal recuperación */
+        .fp-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center; }
+        .fp-overlay.active { display: flex; }
+        .fp-box { background: #fff; border-radius: 12px; padding: 2rem; max-width: 400px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+        .fp-box h3 { margin: 0 0 0.5rem; font-size: 1.1rem; color: #1e293b; display: flex; align-items: center; gap: 0.4rem; }
+        .fp-box p { margin: 0 0 1.25rem; font-size: 0.85rem; color: #64748b; }
+        .fp-box .form-group { margin-bottom: 1rem; }
+        .fp-box label { display: block; margin-bottom: 0.4rem; font-size: 0.82rem; font-weight: 600; color: #374151; }
+        .fp-error { color: #dc2626; font-size: 0.8rem; margin-top: 0.3rem; display: none; }
+        .fp-actions { display: flex; gap: 0.75rem; margin-top: 1.25rem; }
+        .fp-actions button { flex: 1; padding: 0.65rem; border: none; border-radius: 8px; font-size: 0.88rem; font-weight: 600; cursor: pointer; font-family: inherit; }
+        .fp-btn-cancel { background: #f1f5f9; color: #475569; }
+        .fp-btn-send { background: #7e232e; color: #fff; }
+        .fp-btn-send:hover { background: #4a151b; }
+        .fp-success { text-align: center; display: none; }
+        .fp-success i { font-size: 2.5rem; color: #16a34a; display: block; margin-bottom: 0.5rem; }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <div class="login-brand">
+                <img src="../lib/recursos/logo ali.png" alt="Logo Ali Primera" class="logo">
+                <span class="name">Ali Primera</span>
+            </div>
+            <h1 class="login-title">Portal de Profesores</h1>
+            <p class="login-subtitle">Ingresa tus credenciales para continuar</p>
+        </div>
+        
+        <form id="cedulaForm" autocomplete="off">
+            <div class="form-group">
+                <label for="cedula" class="form-label">Cédula de Identidad</label>
+                <div class="input-wrapper">
+                    <i class='bx bx-id-card'></i>
+                    <input type="text" id="cedula" class="form-input" placeholder="Ej: V-12345678 o 12345678" required autocomplete="username">
+                </div>
+                <div id="cedulaError" class="error-message" style="display:none;"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="teacher-password" class="form-label">Contraseña</label>
+                <div class="input-wrapper pw-wrapper">
+                    <i class='bx bx-lock-alt'></i>
+                    <input type="password" id="teacher-password" class="form-input" placeholder="Contraseña" required autocomplete="current-password">
+                    <button type="button" class="pw-toggle" id="teacher-pw-toggle" tabindex="-1">
+                        <i class='bx bx-hide' id="teacher-pw-icon"></i>
+                    </button>
+                </div>
+                <div id="passwordError" class="error-message" style="display:none;"></div>
+                <a class="forgot-link" id="teacher-forgot-link">¿Olvidaste tu contraseña?</a>
+            </div>
+            
+            <button type="submit" class="login-button">Ingresar al Sistema</button>
+        </form>
+        
+        <div class="login-footer">
+            <a href="bienvenida.html" class="back-link">
+                <i class='bx bx-left-arrow-alt'></i> Volver al inicio
+            </a>
+        </div>
+    </div>
+
+    <!-- MODAL RECUPERACIÓN DE CONTRASEÑA -->
+    <div class="fp-overlay" id="teacher-forgot-overlay">
+        <div class="fp-box">
+            <div id="fp-form-view">
+                <h3><i class='bx bx-lock-open-alt' style="color:#7e232e;"></i> Recuperar Contraseña</h3>
+                <p>Ingresa tu cédula o email registrado. El superadministrador recibirá la solicitud y cambiará tu contraseña.</p>
+                <div class="form-group">
+                    <label for="fp-input">Cédula o Email</label>
+                    <input type="text" id="fp-input" class="form-input" placeholder="V-12345678 o email@correo.com" autocomplete="off">
+                    <div id="fp-error" class="fp-error"></div>
+                </div>
+                <div class="fp-actions">
+                    <button class="fp-btn-cancel" id="fp-cancel-btn">Cancelar</button>
+                    <button class="fp-btn-send" id="fp-send-btn">Enviar Solicitud</button>
+                </div>
+            </div>
+            <div class="fp-success" id="fp-success-view">
+                <i class='bx bx-check-circle'></i>
+                <p style="font-weight:600;color:#1e293b;margin-bottom:0.3rem;">¡Solicitud enviada!</p>
+                <p style="color:#64748b;font-size:0.85rem;">El superadministrador ha sido notificado y cambiará tu contraseña pronto. Contáctalo para recibir tu nueva clave.</p>
+                <button class="fp-btn-cancel" id="fp-close-success" style="margin-top:1rem;width:100%;">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="../src/utils/domHelper.js"></script>
+    <script src="../lib/data.js?v=1.2.0"></script>
+    <script type="module">
+        import { showToast } from '../src/utils/domHelper.js';
+        window.showToast = showToast;
+    </script>
+    <script src="login-maestros.js?v=1.1.0" defer></script>
+</body>
+</html>

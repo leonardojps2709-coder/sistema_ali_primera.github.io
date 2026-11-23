@@ -1,0 +1,331 @@
+/* ==========================================================================
+   admin/usuarios.css - Estilos para la Gestión de Usuarios General
+   Diseño sobrio, profesional y plano (sin degradados)
+   ========================================================================== */
+
+.users-panel-container {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 28px 32px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02);
+    border: 1px solid #e5e9f0;
+    margin-bottom: 2rem;
+}
+
+/* Encabezado superior: Título y Botón + Nuevo usuario */
+.users-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    position: relative;
+}
+
+.users-panel-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+
+.users-btn-dropdown-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.btn-new-user-main {
+    background-color: #1e293b;
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+    transition: background-color 0.18s ease, transform 0.1s ease;
+}
+
+.btn-new-user-main:hover {
+    background-color: #0f172a;
+}
+
+.btn-new-user-main:active {
+    transform: scale(0.98);
+}
+
+/* Menú desplegable para Nuevo Usuario */
+.new-user-popup-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+    width: 220px;
+    padding: 6px;
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 100;
+}
+
+.new-user-popup-menu.show {
+    display: flex;
+}
+
+.new-user-popup-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    width: 100%;
+    border: none;
+    background: transparent;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #1e293b;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: left;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.new-user-popup-item i {
+    font-size: 1.2rem;
+    color: #475569;
+}
+
+.new-user-popup-item:hover {
+    background-color: #f1f5f9;
+    color: #0f172a;
+}
+
+.new-user-popup-item:hover i {
+    color: #0f172a;
+}
+
+/* Tarjetas de Categoría de Usuarios */
+.user-category-card {
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 28px;
+    border: 1px solid transparent;
+}
+
+.user-category-card:last-child {
+    margin-bottom: 0;
+}
+
+.admin-card {
+    border-color: #cfe1f0;
+}
+
+.teacher-card {
+    border-color: #e7dbf5;
+}
+
+/* Cabeceras de las tablas agrupadas */
+.user-category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 13px 22px;
+    color: #ffffff;
+}
+
+.admin-header {
+    background-color: #14527d;
+}
+
+.teacher-header {
+    background-color: #551b85;
+}
+
+.user-category-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+}
+
+.user-category-title i {
+    font-size: 1.25rem;
+}
+
+.user-category-badge {
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 4px 14px;
+    border-radius: 9999px;
+    color: #ffffff;
+    display: inline-block;
+}
+
+.admin-badge {
+    background-color: #1a689b;
+}
+
+.teacher-badge {
+    background-color: #7023aa;
+}
+
+/* Envoltura y Tablas */
+.user-category-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.user-category-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+/* Filas Administradores */
+.admin-table tbody tr {
+    background-color: #f0f7fc;
+    border-bottom: 1px solid #e1edf6;
+    transition: background-color 0.15s ease;
+}
+
+.admin-table tbody tr:hover {
+    background-color: #e5f1fa;
+}
+
+.admin-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+/* Filas Profesores */
+.teacher-table tbody tr {
+    background-color: #f6f3fc;
+    border-bottom: 1px solid #eee5f8;
+    transition: background-color 0.15s ease;
+}
+
+.teacher-table tbody tr:hover {
+    background-color: #eee6f8;
+}
+
+.teacher-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+/* Celdas */
+.user-category-table td {
+    padding: 16px 22px;
+    font-size: 0.93rem;
+    vertical-align: middle;
+}
+
+.user-col-cedula {
+    font-weight: 600;
+    color: #0f172a;
+    width: 18%;
+    white-space: nowrap;
+}
+
+.user-col-name {
+    font-weight: 600;
+    color: #1e293b;
+    width: 25%;
+}
+
+.user-col-email {
+    color: #334155;
+    width: 30%;
+}
+
+.user-col-phone {
+    color: #334155;
+    width: 19%;
+    white-space: nowrap;
+}
+
+.user-col-actions {
+    width: 8%;
+    text-align: right;
+    white-space: nowrap;
+}
+
+/* Iconos de Acción */
+.admin-user-lock {
+    font-size: 1.25rem;
+    color: #64748b;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 4px;
+}
+
+.user-action-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 10px;
+    transition: background-color 0.15s ease, transform 0.1s ease;
+    vertical-align: middle;
+}
+
+.user-action-btn:active {
+    transform: scale(0.92);
+}
+
+.user-action-btn.edit-user {
+    color: #334155;
+    font-size: 1.25rem;
+}
+
+.user-action-btn.edit-user:hover {
+    background-color: rgba(51, 65, 85, 0.09);
+    color: #0f172a;
+}
+
+.user-action-btn.delete-user {
+    color: #b91c1c;
+    font-size: 1.25rem;
+}
+
+.user-action-btn.delete-user:hover {
+    background-color: rgba(185, 28, 28, 0.09);
+    color: #991b1b;
+}
+
+/* Estado Vacío */
+.user-table-empty {
+    text-align: center;
+    padding: 24px !important;
+    color: #64748b;
+    font-style: italic;
+    background-color: transparent !important;
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+    .users-panel-container {
+        padding: 18px 16px;
+    }
+    
+    .users-panel-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    .user-category-table td {
+        padding: 12px 14px;
+        font-size: 0.88rem;
+    }
+}

@@ -1,0 +1,516 @@
+/* lib/boletin.css
+   Estilos Oficiales del Boletín de Calificaciones — E.T. "Alí Primera"
+   Basado fielmente en el formato físico oficial (Plantillas/boletin/Recibo_2026-11-13_223946.pdf).
+*/
+
+/* ===== CONTENEDOR GENERAL ===== */
+.boletin-oficial-wrapper {
+    width: 100%;
+    margin: 0 auto;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
+    color: #0f172a;
+}
+
+/* ===== BARRA DE HERRAMIENTAS (PANTALLA) ===== */
+.boletin-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 0.85rem 1.25rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.boletin-toolbar-momentos {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.boletin-toolbar .toolbar-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.boletin-toolbar .toolbar-label i {
+    font-size: 1.1rem;
+    color: #4a151b;
+}
+
+.boletin-selector {
+    display: inline-flex;
+    align-items: center;
+    background: #f1f5f9;
+    padding: 3px;
+    border-radius: 8px;
+    gap: 2px;
+}
+
+.boletin-momento-btn {
+    border: none;
+    background: transparent;
+    color: #475569;
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.boletin-momento-btn:hover {
+    color: #0f172a;
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.boletin-momento-btn.activo {
+    background: #4a151b;
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(74, 21, 27, 0.25);
+}
+
+.boletin-print-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.55rem 1.2rem;
+    font-size: 0.86rem;
+    font-weight: 600;
+    background: #4a151b;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.boletin-print-btn:hover {
+    background: #7e232e;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(74, 21, 27, 0.25);
+}
+
+/* ===== HOJA OFICIAL DEL BOLETÍN ===== */
+.boletin-oficial-documento {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 1.8rem 2.2rem;
+    box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
+    max-width: 1040px;
+    margin: 0 auto;
+    color: #000000;
+    box-sizing: border-box;
+}
+
+/* 1. ENCABEZADO INSTITUCIONAL */
+.boletin-oficial-cabecera {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1.5px solid #000000;
+}
+
+.cabecera-institucion {
+    flex: 1;
+}
+
+.inst-nombre {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: #000000;
+    text-transform: uppercase;
+    line-height: 1.25;
+}
+
+.inst-linea {
+    margin: 2px 0 0 0;
+    font-size: 0.74rem;
+    color: #1e293b;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    line-height: 1.25;
+}
+
+.cabecera-meta {
+    border: 1px solid #000000;
+    padding: 0.4rem 0.75rem;
+    min-width: 220px;
+    background: #fafafa;
+}
+
+.meta-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.74rem;
+    line-height: 1.45;
+}
+
+.meta-label {
+    font-weight: 600;
+    color: #334155;
+}
+
+.meta-valor {
+    font-weight: 700;
+    color: #000000;
+}
+
+/* 2. TÍTULO CENTRAL */
+.boletin-oficial-titulo-container {
+    text-align: center;
+    margin: 0.65rem 0 0.5rem 0;
+}
+
+.boletin-oficial-titulo {
+    margin: 0;
+    font-size: 1.22rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #000000;
+}
+
+/* 3. SUBMETADATOS: AÑO, SECCIÓN, MENCIÓN, MOMENTO */
+.boletin-oficial-submeta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    padding: 0.35rem 0.6rem;
+    background: #f8fafc;
+    border: 1px solid #000000;
+    font-size: 0.76rem;
+    margin-bottom: 0.35rem;
+}
+
+.submeta-campo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.submeta-label {
+    font-weight: 700;
+    color: #000000;
+}
+
+.submeta-valor {
+    font-weight: 700;
+    color: #000000;
+}
+
+.submeta-momento .momento-badge {
+    background: #000000;
+    color: #ffffff;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.74rem;
+    letter-spacing: 0.03em;
+}
+
+/* 4. LÍNEA DEL ESTUDIANTE */
+.boletin-oficial-estudiante {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.35rem 0.6rem;
+    border: 1px solid #000000;
+    background: #ffffff;
+    font-size: 0.8rem;
+    margin-bottom: 0.6rem;
+}
+
+.estudiante-label {
+    font-weight: 800;
+    color: #000000;
+}
+
+.estudiante-cedula {
+    font-weight: 700;
+    color: #000000;
+    margin-right: 0.5rem;
+}
+
+.estudiante-nombre {
+    font-weight: 800;
+    color: #000000;
+    letter-spacing: 0.02em;
+}
+
+/* 5. TABLA OFICIAL DE 11 COLUMNAS */
+.boletin-oficial-tabla-wrap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.boletin-oficial-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1.5px solid #000000;
+    font-size: 0.78rem;
+    background: #ffffff;
+}
+
+.boletin-oficial-tabla th,
+.boletin-oficial-tabla td {
+    border: 1px solid #000000;
+    padding: 3.5px 4px;
+    text-align: center;
+    vertical-align: middle;
+    box-sizing: border-box;
+}
+
+.boletin-oficial-tabla thead th {
+    background: #f1f5f9;
+    font-weight: 800;
+    font-size: 0.71rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: #000000;
+    line-height: 1.2;
+}
+
+.boletin-oficial-tabla th.th-materia {
+    width: 32%;
+    text-align: left;
+    padding-left: 8px;
+}
+
+.boletin-oficial-tabla th.th-lap {
+    width: 10%;
+}
+
+.boletin-oficial-tabla th.th-def {
+    width: 8%;
+}
+
+.boletin-oficial-tabla th.th-rev {
+    width: 9%;
+}
+
+.boletin-oficial-tabla th.th-pen {
+    width: 9%;
+}
+
+.boletin-oficial-tabla th.th-fir {
+    width: 12%;
+}
+
+.boletin-oficial-tabla td.materia-nombre {
+    text-align: left;
+    font-weight: 700;
+    padding-left: 8px;
+    font-size: 0.75rem;
+    color: #000000;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Celdas numéricas */
+.boletin-oficial-tabla td.col-nota,
+.boletin-oficial-tabla td.col-inas,
+.boletin-oficial-tabla td.col-definitiva {
+    font-variant-numeric: tabular-nums;
+    font-size: 0.8rem;
+}
+
+.boletin-oficial-tabla td.col-nota {
+    font-weight: 700;
+    width: 5.5%;
+}
+
+.boletin-oficial-tabla td.col-inas {
+    font-weight: 500;
+    color: #334155;
+    width: 4.5%;
+}
+
+.boletin-oficial-tabla td.col-definitiva {
+    font-weight: 800;
+    background: #fafafa;
+}
+
+/* Resaltado de columna activa en pantalla */
+.boletin-oficial-tabla th.col-activa {
+    background: #fef08a !important;
+    color: #713f12 !important;
+}
+
+.boletin-oficial-tabla td.col-activa {
+    background: #fefce8 !important;
+}
+
+/* Fila de promedios generales */
+.boletin-oficial-tabla tr.fila-promedios td {
+    background: #f8fafc;
+    border-top: 1.5px solid #000000;
+    font-weight: 800;
+}
+
+/* 6. SECCIÓN DE OBSERVACIONES */
+.boletin-oficial-observaciones {
+    margin-top: 0.65rem;
+    border: 1px solid #000000;
+    padding: 0.5rem 0.75rem;
+    background: #ffffff;
+}
+
+.obs-label {
+    font-size: 0.74rem;
+    font-weight: 800;
+    color: #000000;
+    display: block;
+    margin-bottom: 0.35rem;
+}
+
+.obs-lineas {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.obs-linea {
+    border-bottom: 1px dotted #475569;
+    height: 1px;
+    width: 100%;
+}
+
+/* 7. PIE: FECHA, SELLO Y FIRMA */
+.boletin-oficial-pie {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.2fr;
+    gap: 1.5rem;
+    margin-top: 0.85rem;
+    align-items: end;
+}
+
+.pie-col.pie-fecha {
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding-bottom: 0.4rem;
+}
+
+.pie-col.pie-sello {
+    text-align: center;
+}
+
+.sello-plantel {
+    border: 1px dashed #94a3b8;
+    border-radius: 50%;
+    width: 90px;
+    height: 90px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-align: center;
+    line-height: 1.2;
+    padding: 4px;
+}
+
+.pie-col.pie-docente {
+    text-align: center;
+    padding-bottom: 0.2rem;
+}
+
+.docente-linea {
+    border-bottom: 1px solid #000000;
+    width: 85%;
+    margin: 0 auto 0.35rem auto;
+}
+
+.docente-cargo {
+    font-size: 0.76rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.docente-nombre {
+    font-size: 0.72rem;
+    color: #334155;
+    margin-top: 2px;
+}
+
+/* ===== MODO IMPRESIÓN OFICIAL ===== */
+@media print {
+    @page {
+        size: letter landscape;
+        margin: 5mm 8mm;
+    }
+
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    html, body {
+        background: #ffffff !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        font-family: Arial, Helvetica, sans-serif !important;
+        color: #000000 !important;
+        font-size: 11px !important;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+
+    .boletin-oficial-wrapper {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .boletin-oficial-documento {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .boletin-oficial-tabla {
+        border: 1.5px solid #000000 !important;
+    }
+
+    .boletin-oficial-tabla th,
+    .boletin-oficial-tabla td {
+        border: 1px solid #000000 !important;
+    }
+
+    .boletin-oficial-tabla th.col-activa,
+    .boletin-oficial-tabla td.col-activa {
+        background: transparent !important;
+        color: #000000 !important;
+    }
+
+    .submeta-momento .momento-badge {
+        background: #000000 !important;
+        color: #ffffff !important;
+    }
+}

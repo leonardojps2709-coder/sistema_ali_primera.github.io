@@ -1,0 +1,125 @@
+@import url('../lib/fonts/poppins/poppins.css');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+:root {
+    --maroon: #4a151b;
+    --maroon-hover: #7e232e;
+    --white: #ffffff;
+}
+
+.welcome-container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-image: url(../lib/recursos/100_2105.jpg);
+    background-size: cover;
+    background-position: center;
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(3px);
+}
+
+.welcome-card {
+    position: relative;
+    z-index: 10;
+    background: rgba(83, 47, 47, 0.701);
+    padding: 1.5rem; /* Reducido de 3rem */
+    border-radius: 1rem;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+    text-align: center;
+    max-width: 360px; /* Más estrecho */
+    width: 90%;
+}
+
+.logo-section img {
+    width: 70px; /* Logo más pequeño */
+    margin-bottom: 0.5rem;
+}
+
+.logo-section h1 {
+    color: var(--maroon);
+    font-size: 1.3rem; /* Título reducido */
+    line-height: 1.2;
+    margin-bottom: 0.2rem;
+}
+
+.logo-section p {
+    color: #dedede;
+    font-weight: 600;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    margin-bottom: 1.2rem;
+}
+
+.selection-section h2 {
+    font-size: 1.1rem;
+    color: #ffffff;
+    margin-bottom: 0.3rem;
+}
+
+.selection-section p {
+    font-size: 0.85rem;
+    color: #777;
+    margin-bottom: 1.2rem;
+}
+
+.button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.role-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.7rem;
+    padding: 0.8rem; /* Botones más delgados */
+    border: none;
+    border-radius: 0.6rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+}
+
+.role-btn i {
+    font-size: 1.2rem;
+}
+
+.role-btn.teacher {
+    background-color: #27ae60;
+    color: white;
+}
+
+.role-btn.teacher:hover {
+    background-color: #219150;
+    transform: translateY(-2px);
+}
+
+.role-btn.admin {
+    background-color: var(--maroon);
+    color: white;
+}
+
+.role-btn.admin:hover {
+    background-color: var(--maroon-hover);
+    transform: translateY(-2px);
+}

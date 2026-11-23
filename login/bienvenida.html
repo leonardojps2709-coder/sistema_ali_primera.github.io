@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenido - Sistema Escolar Ali Primera</title>
+    <link rel="stylesheet" href="bienvenida.css">
+    <link rel="stylesheet" href="../lib/boxicons/css/boxicons.min.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body>
+    <div class="welcome-container">
+        <div class="overlay"></div>
+
+        <div class="welcome-card">
+            <div class="logo-section">
+                <img src="../lib/recursos/logo ali.png" alt="Logo Ali Primera">
+                <h1>Sistema de Registro de Notas</h1>
+                <p>E.T.R. "Alí Primera"</p>
+            </div>
+
+            <div class="selection-section">
+                <h2>Bienvenido</h2>
+                <p>Por favor, selecciona tu rol para ingresar al sistema:</p>
+
+                <div class="button-group">
+                    <button class="role-btn teacher" onclick="goToLogin('profesor')">
+                        <i class='bx bxs-graduation'></i>
+                        <span>PROFESOR</span>
+                    </button>
+
+                    <button class="role-btn admin" onclick="goToLogin('administrador')">
+                        <i class='bx bxs-user-badge'></i>
+                        <span>ADMINISTRADOR</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+function goToLogin(role) {
+    // Guarda el rol en el almacenamiento local
+    localStorage.setItem('userRole', role);
+    
+    // Si el rol es profesor, redirige al login de cédula
+    if (role === 'profesor') {
+        window.location.href = 'login-maestros.html';
+    } else {
+        // Para administradores u otros, redirige al login normal
+        window.location.href = 'login.html';
+    }
+}
+    </script>
+</body>
+</html>

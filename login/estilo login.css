@@ -1,0 +1,291 @@
+@import url('../lib/fonts/poppins/poppins.css');
+
+/* ===== VARIABLES (Basadas en estilo index.css) ===== */
+:root {
+    --maroon: #4a151b;
+    --maroon-hover: #7e232e;
+    --bg-color: #E8ECF2;
+    --white: #ffffff;
+    --text-dark: #333333;
+    --error-red: #d32f2f;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Fondo con imagen y overlay similar a bienvenida.css */
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+                url('../lib/recursos/100_2105.jpg');
+    background-size: cover;
+    background-position: center;
+    backdrop-filter: blur(3px);
+}
+
+/* ===== CONTENEDOR PRINCIPAL (CARD) ===== */
+.login-container {
+    background-color: var(--white);
+    width: 100%;
+    max-width: 400px;
+    padding: 2.5rem;
+    border-radius: 1.2rem;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== HEADER DEL LOGIN ===== */
+.login-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.login-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+}
+
+.login-brand .logo {
+    width: 50px;
+    height: auto;
+}
+
+.login-brand .name {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--maroon);
+    letter-spacing: 1px;
+}
+
+.login-title {
+    font-size: 1.5rem;
+    color: var(--text-dark);
+    font-weight: 600;
+}
+
+.login-subtitle {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 0.3rem;
+}
+
+/* ===== FORMULARIO ===== */
+.form-group {
+    margin-bottom: 1.2rem;
+    position: relative;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+    padding-left: 0.2rem;
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 2px solid #eee;
+    border-radius: 0.6rem;
+    outline: none;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.form-input:focus {
+    border-color: var(--maroon);
+    background-color: #f9f9f9;
+}
+
+.password-field-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 1.2rem;
+    cursor: pointer;
+    color: #888;
+    font-size: 1.3rem;
+    transition: color 0.3s;
+    user-select: none;
+}
+
+.toggle-password:hover {
+    color: var(--maroon);
+}
+
+/* MENSAJES DE ERROR (Ocultos por defecto) */
+.error-message {
+    color: #d32f2f;
+    font-size: 0.8rem;
+    margin-top: 0.3rem;
+    display: none;
+}
+
+/* ===== LINKS Y BOTONES ===== */
+.forgot-password {
+    text-align: right;
+    margin-bottom: 1.5rem;
+}
+
+.forgot-password a {
+    color: var(--maroon);
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.forgot-password a:hover {
+    color: var(--maroon-hover);
+    text-decoration: underline;
+}
+
+.login-button {
+    width: 100%;
+    padding: 0.9rem;
+    background-color: var(--maroon);
+    color: white;
+    border: none;
+    border-radius: 0.6rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.login-button:hover {
+    background-color: var(--maroon-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(74, 21, 27, 0.3);
+}
+
+.login-button:active {
+    transform: translateY(0);
+}
+
+/* ===== FOOTER DEL LOGIN ===== */
+/* ===== ESTILOS DEL BOTÓN VOLVER (Basado en login-cedula) ===== */
+.login-footer {
+    margin-top: 1.5rem;
+    border-top: 1px solid #eee;
+    padding-top: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.back-link {
+    text-decoration: none;
+    color: #888;
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    transition: all 0.3s ease;
+}
+
+.back-link i {
+    font-size: 1.2rem;
+}
+
+.back-link:hover {
+    color: var(--maroon); /* Usa el vinotinto institucional */
+    transform: translateX(-5px); /* Efecto de flecha que se mueve a la izquierda */
+}
+
+.support-text {
+    font-size: 0.75rem;
+    color: #bbb;
+}
+/* RESPONSIVE */
+@media (max-width: 480px) {
+    .login-container {
+        width: 90%;
+        padding: 1.5rem;
+    }
+}
+
+/* Toast notifications */
+.toast-notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: white;
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    z-index: 2100;
+    animation: slideInRight 0.3s ease;
+    border-left: 4px solid;
+}
+
+.toast-notification.success {
+    border-left-color: #4caf50;
+}
+
+.toast-notification.error {
+    border-left-color: #d32f2f;
+}
+
+.toast-notification i {
+    font-size: 1.5rem;
+}
+
+.toast-notification.success i {
+    color: #4caf50;
+}
+
+.toast-notification.error i {
+    color: #d32f2f;
+}
+
+.toast-notification.fade-out {
+    animation: fadeOut 0.3s ease forwards;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
